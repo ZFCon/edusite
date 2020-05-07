@@ -1,0 +1,384 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<!-- Modal -->
+<div class="modal fade" id="courseFormModal" tabindex="-1" role="dialog" aria-labelledby="courseFormModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="courseFormModalLabel">Modal title</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+  
+        <div class="modal-body">
+          <form role="form" id="courseForm" novalidate>
+              <div class="row">
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label class="col-form-label" for="{{ form.dcls_abb.id_for_label }}">Abbreviation</label>
+                            {{ form.ce_abb }}
+                        </div>
+                    </div>
+                    <div class="col-sm-9">
+                        <div class="form-group">
+                            <label class="col-form-label" for="{{ form.dcls_name.id_for_label }}">Course Name</label>
+                            {{ form.ce_name }}
+                        </div>
+                    </div>
+              </div>
+          </form>
+        </div>
+  
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" id="save-course-form">Save changes</button>
+        </div>
+  
+      </div>
+    </div>
+</div>
+<!-- Modal -->
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h3></h3>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'list_inst' %}">Home</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'list_inst' %}">Institutes</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'list_inst' %}">Schools</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'list_inst' %}">Departments</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'list_inst' %}">Classes</a>
+            </li>
+            <li class="breadcrumb-item active">
+                <strong>Courses</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-2">
+
+    </div>
+</div>
+
+<div class="wrapper wrapper-content">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="row">
+              <div class="col-lg-12">
+                  <button type="button" class="btn btn-primary btn-xs" id="create-new-course">New Course</button>
+                  <p></p>
+              </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+      <div class="col-lg-9">
+          <div class="ibox">
+              <div class="ibox-content">
+                  <table class="footable table table-stripped toggle-arrow-tiny" data-page-size="15" id="courses-table">
+                      <thead>
+                          <tr>
+                              <th>ID</th>
+                              <th data-hide="phone">Course Name</th>
+                              <th data-hide="phone">Status</th>
+                              <th class="text-right">Action</th>
+                          </tr>
+                      </thead>
+                      <tbody id="course-list"></tbody>
+  
+                      <tfoot>
+                      <tr>
+                          <td colspan="7">
+                              <ul class="pagination float-right"></ul>
+                          </td>
+                      </tr>
+                      </tfoot>
+                  </table>
+  
+              </div>
+          </div>
+      </div>
+  </div>
+    
+  </div>
+{% endblock %}
+
+{% block page_js %}
+<script type="text/javascript" src="{% static 'js/ajax-tools.js' %}"></script>
+<script type="text/javascript">
+
+    function Courses() {
+        this.apiUrl = '/api/inst/';
+        var newURL = window.location.pathname.split('/');
+        this.instId = newURL[2];
+        this.schId = newURL[4];
+        this.dptId = newURL[6];
+        this.dptclsId = newURL[8];
+        this.url = sprintf('%s%s%s%s%s%s%s%s%s', this.apiUrl, this.instId, '/sch/', this.schId, '/dept/', this.dptId, '/dptcls/', this.dptclsId, '/crse/' );
+
+        this.setUpTableButtons = function() {
+            $(document).on('click', 'button.delete-course', (function(event) {
+                const courseId = $(event.target).attr('data-courseid');
+                this.deleteCourse(courseId);
+            }).bind(this));
+
+            $(document).on('click', 'button.edit-course', (function(event) {
+                const editButton = new ButtonWrapper(event.target);
+                editButton.loading();
+
+                const courseId = $(event.target).attr('data-courseid');
+                this.setUpeditCourse(editButton, courseId);
+            }).bind(this));
+        }
+
+        this.getCourses = function() {
+            console.log(this.url);
+            const tbodyCss = '#courses-table > tbody';
+            const self = this;
+
+            $(tbodyCss).empty();
+           
+            $.getJSON(this.url, function(response) {
+                console.log(response);
+                response.map(function(course) {
+                    $(tbodyCss).append(sprintf(
+                        '<tr> \
+                            <td>%(abb)s</td> \
+                            <td>%(name)s</td> \
+                            <td>%(status)s</td> \
+                            <td>%(actions)s</td> \
+                        </tr>',
+                        {
+                            abb: course.ce_abb,
+                            name: self.getNameNode(course),
+                            status: '<span class="label label-primary">Paid</span>',
+                            actions: self.getActionsNode(course),
+                        }
+                    ));
+                });
+            }).fail(function(err) {
+                window.alert('Cannot get Course'); 
+            });
+        }
+
+        this.getNameNode = function(course) {
+            return sprintf('<a href="%s/cdetail/">%s</a>', course.id, course.ce_name);
+        }
+
+        this.getActionsNode = function(course) {
+            const node = sprintf('\
+                <div class="btn-group pull-right"> \
+                    <button data-courseId="%(courseId)s" class="btn-white btn btn-xs edit-course">Edit</button> \
+                    <button data-courseId="%(courseId)s" class="btn-white btn btn-xs delete-course">Delete</button> \
+                </div>',
+                {
+                    courseId: course.id
+                }
+            );
+
+            return node;
+        }
+
+        this.pullCourses = function() {
+            window.setInterval((function() {
+                this.getCourses();
+
+            }).bind(this), 1000 * 60);
+        }
+
+        this.courseFormIsValid = function() {
+
+            const form = document.getElementById('courseForm');
+            form.classList.remove('was-validated');
+
+            if (form.checkValidity() === true) {
+                const data = {};
+                data.ce_dptcls = this.dptclsId;
+                data.ce_abb = $('input[name="ce_abb"]').val();
+                data.ce_name = $('input[name="ce_name"]').val();
+
+                console.log(data);
+
+                return data;
+
+            } else {
+                form.classList.add('was-validated');
+            }
+        }
+
+        this.clearCourseForm = function() {
+            $('input[name="ce_abb"]').val(null);
+            $('input[name="ce_name"]').val(null);
+        }
+
+        this.createCourse = function(button) {
+            console.log('Create Class');
+
+            const newCourseData = this.courseFormIsValid();
+
+            if (newCourseData) {
+                $.ajax({
+                    url: this.url,
+                    method: 'POST',
+                    context: this,
+                    data: newCourseData,
+                    success: function(res) {
+                        $('#courseFormModal').modal('hide');
+                        this.clearCourseForm();
+                        this.getCourses();
+                    },
+                    error: function(err) {
+                        if (err.hasOwnProperty('responseJSON')) {
+                            console.log(err.responseJSON);
+                            const errKey = Object.keys(err.responseJSON)[0];
+                            window.alert(sprintf('Cannot create Course: %s', err.responseJSON[errKey][0]));
+                        } else {
+                            window.alert('Cannot Create Course.');
+                        }
+                    },
+                    complete: function() {
+                        button.reset();
+                    }
+                });
+            } else {
+                button.reset();
+            }
+        }
+
+        this.updateCourse = function(button, courseId) {
+            console.log('Update Course');
+
+            const newCourseData = this.courseFormIsValid();
+            console.log(newCourseData);
+
+            if (newCourseData) {
+                console.log('Update Course: ', courseId);
+                const surl = sprintf('%s%s/', this.url, courseId);
+
+                $.ajax({
+                    context: this,
+                    url: surl,
+                    method: 'PUT',
+                    data: newCourseData,
+                    success: function(resp) {
+                        $('#courseFormModal').modal('hide');
+                        this.clearCourseForm();
+                        this.getCourses();
+                        $('#save-course-form').attr('data-courseid', null);
+                    },
+                    error: function(err) {
+                        if (err.hasOwnProperty('responseJSON')) {
+                            console.log(err.responseJSON);
+                            const errKey = Object.keys(err.responseJSON)[0];
+                            window.alert(sprintf('Cannot update course: %s', err.responseJSON[errKey][0]));
+                        } else {
+                            window.alert('Cannot create course.');
+                        }
+                    },
+                    complete: function() {
+                        button.reset();
+                    }
+                });
+
+            } else {
+                button.reset();
+            }
+        }
+
+        this.deleteCourse = function(courseId) {
+            console.log('Delete Course: ', courseId);
+            const surl = sprintf('%s%s', this.url, courseId);
+
+            console.log(surl);
+
+            $.ajax({
+                context: this,
+                url: surl,
+                method: 'DELETE',
+                success: function(resp) {
+                    this.getCourses();
+                },
+                error: function(resp) {
+                    window.alert('Cannot Remove Course');
+                }
+            });
+        }
+
+        this.setUpeditCourse = function(button, courseId) {
+            console.log('Edit Course: ', courseId);
+            const surl = sprintf('%s%s', this.url, courseId);
+            console.log(surl);
+
+            $('#save-course-form').attr('data-courseid', courseId);
+
+            $.getJSON(surl, function(response) {
+                console.log(response);
+                button.reset();
+
+                $('#courseFormModalLabel').text('Update Course');
+                $('#courseFormModal').modal('show');
+
+                $('input[name="ce_abb"]').val(response.ce_abb);
+                $('input[name="ce_name"]').val(response.ce_name);
+
+
+            });
+        }
+    }
+
+    function ButtonWrapper(buttonObj) {
+        this.originText = $(buttonObj).text();
+
+        this.loading = function() {
+            $(buttonObj).attr('disabled', true);
+            $(buttonObj).html('<span class="spinner-border spinner-border-sm"></span> Loading...');
+        }
+
+        this.reset = function() {
+            $(buttonObj).text(this.originText);
+            $(buttonObj).attr('disabled', false);
+        }
+    }
+
+    $(document).ready(function(event) {
+        const courses = new Courses();
+
+        courses.setUpTableButtons();
+        courses.getCourses();
+        // courses.pullCourses();
+
+        $('#create-new-course').on('click', function(event) {
+            // $('#save-institute-form').attr('data-instituteid', null);
+            // students.clearInstituteForm();
+            $('#courseFormModalLabel').text('Create new Course');
+            $('#courseFormModal').modal('show');
+        });
+
+        $('#save-course-form').on('click', function(event) {
+            const saveButton = new ButtonWrapper(event.target);
+            saveButton.loading();
+
+            const courseId = $(this).attr('data-courseid');
+
+            if (courseId) {
+                console.log('Updating');
+                courses.updateCourse(saveButton, courseId);
+            } else {
+                console.log('Creating');
+                courses.createCourse(saveButton);
+            }
+        });
+    });
+</script>
+{% endblock %}

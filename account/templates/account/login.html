@@ -1,0 +1,80 @@
+{% extends "regbase.html" %}
+
+{% block content %}
+
+<div class="loginColumns animated fadeInDown">
+    <div class="row">
+
+        <div class="col-md-6">
+            <h2 class="font-bold">Welcome to HKUST</h2>
+
+            <p>
+                Perfectly designed and precisely prepared admin theme with over 50 pages with extra new web app views.
+            </p>
+
+            <p>
+                Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.
+            </p>
+
+            <p>
+                When an unknown printer took a galley of type and scrambled it to make a type specimen book.
+            </p>
+
+            <p>
+                <small>It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.</small>
+            </p>
+
+        </div>
+        <div class="col-md-6">
+          <form class="m-t" role="form" method="post">{% csrf_token %}
+            <div class="ibox-content">
+                
+                    
+                    <div class="form-group">
+                      <input type="email" name="email" class="form-control" placeholder="Email" required>
+                      {% for field in login_form %}
+                        {% for error in field.errors %}
+                          <label id="email-error" class="error" for="email">{{ error }}</label>
+                        {% endfor %}
+                      {% endfor %}
+                      
+                    </div>
+                    <div class="form-group">
+                      <input type="password" name="password" class="form-control" placeholder="Password" required>
+                      {% if login_form.non_field_errors %}
+                        <label id="password-error" class="error" for="password">{{login_form.non_field_errors}}</label>  
+                      {% endif %}
+
+                    </div>
+                    <button type="submit" class="btn btn-primary block full-width m-b">Login</button>
+                    <input type="hidden" name="next" value="{{ next }}" />
+
+                    <a href="/password_change/">
+                        <small>Forgot password?</small>
+                    </a>
+
+                    <p class="text-muted text-center">
+                        <small>Do not have an account?</small>
+                    </p>
+                    <a class="btn btn-sm btn-white btn-block" href="/member/register/">Create an account</a>
+                </form>
+                <p class="m-t">
+                    <small>Inspinia we app framework base on Bootstrap 3 © 2014</small>
+                </p>
+            </div>
+          </form>
+            
+        </div>
+    </div>
+    <hr>
+    <div class="row">
+        <div class="col-md-6">
+            IUO Technologies Limited
+        </div>
+        <div class="col-md-6 text-right">
+           <small>© 2019-2020</small>
+        </div>
+    </div>
+</div>
+  
+{% endblock %}

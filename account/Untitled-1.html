@@ -1,0 +1,643 @@
+<html>
+    <head>
+        <title>The jQuery Example</title>
+
+        <script type="text/javascript" src="/jquery/jquery-2.1.3.min.js"></script>
+
+        <script type="text/javascript">
+            $(document).ready(function(){
+
+                // do stuff when DOM is ready
+                document.write("Hello, World!");
+            });
+            
+        </script>
+    </head>
+
+ <body>
+
+    <h1>Hello</h1>
+
+ </body>
+</html>
+
+<script type="text/javascript">
+// jQuery reads or manipulates the document object model (DOM), 
+// We need to make sure that we start adding events etc. as soon as the DOM is ready.
+
+
+// If you want an event to work on your page, you should call it inside the $(document).ready() function. 
+// Everything inside it will load as soon as the DOM is loaded and before the page contents are loaded
+
+
+// Arrays
+var x = [];
+var y = [1, 2, 3, 4, 5];
+
+var x = [1, 2, 3, 4, 5];
+for (var i = 0; i < x.length; i++) {
+ // Do something with x[i]
+}
+
+
+// Functions: A function in JavaScript can be either named or anonymous. 
+// A named function can be defined using function keyword 
+
+function named(){
+ // do some stuff here
+}
+
+
+// An anonymous function can be defined in similar way as a normal function 
+// but it would not have any name. An anonymous function can be assigned to 
+// a variable or passed to a method
+
+var handler = function (){
+ // do some stuff here
+}
+
+// JavaScript famous keyword this always refers to the current context. 
+// Within a function this context can change, depending on how the function is called
+
+$(document).ready(function() {
+    // this refers to window.document
+
+});
+
+$("div").click(function() {
+    // this refers to a div DOM element
+
+});
+
+
+// A callback is a plain JavaScript function passed to some method as an argument or option.
+// Some callbacks are just events, called to give the user a chance to react when a certain state is triggered. 
+
+
+$("body").click(function(event) {
+    
+    console.log("clicked: " + event.target);
+});
+
+
+// Most callbacks provide arguments and a context. In the event-handler example, the callback
+// is called with one argument, an Event. Some callbacks are required to return something,
+// others make that return value optional. To prevent a form submission, a submit event handler
+// can return false as follows:
+
+
+$("#myform").submit(function() {
+    
+    return false;
+});
+
+// Closures are created whenever a variable that is defined outside the current scope is accessed
+// from within some inner scope. Following example shows how the variable counter is visible
+// within the create, increment, and print functions, but not outside of them
+
+function create() {
+    var counter = 0;
+    
+    return {
+        increment: function() {
+            counter++;
+        },
+        print: function() {
+            console.log(counter); }
+    }
+}
+
+var c = create();
+c.increment();
+c.print(); // ==> 1
+
+// This pattern allows you to create objects with methods that operate on data that isn't visible
+// to the outside world. It should be noted that data hiding is the very basis of object-oriented programming
+
+
+
+// The $() Factory Function: All type of selectors available in jQuery, always start with the dollar sign and 
+// parentheses:$(). The factory function $() makes use of the following three building blocks while selecting
+// elements in a given document: 
+
+// Tag Name: $('p') - selects paragraph 
+// Tag ID: $('#some-id') 
+// Tag Class: $('.some-class')
+
+
+$(document).ready(function() {
+    
+    var pars = $("p");
+    for( i=0; i<pars.length; i++ ){
+        alert("Found paragraph: " + pars[i].innerHTML);
+    }
+
+});
+
+// jQuery - Element Name Selector: The element selector selects all the elements that have a tag name of T.
+
+
+$('p')  // Selects all elements with a tag name of p in the document.
+$('div')  // Selects all elements with a tag name of div in the document.
+
+
+// Following example would select all the divisions and will apply yellow color to their background 
+
+$(document).ready(function() {
+    
+    /* This would select all the divisions */
+    $("div").css("background-color", "yellow");
+
+ });
+
+
+ // jQuery -Element ID Selector:  The element ID selector selects a single element with the given id attribute.
+
+$('#myid') − // Selects a single element with the given id myid.
+$('div#yourid') − // Selects a single division with the given id yourid.
+
+
+
+// jQuery -Element Class Selector: The element class selector selects all the elements which match with 
+// the given class of the elements
+
+$('.big')  // Selects all the elements with the given class ID big.
+$('p.small')  // Selects all the paragraphs with the given class ID small.
+$('.big.small')  // Selects all the elements with a class of big and small.
+
+
+// jQuery -Multiple ElementsSelector: This Multiple Elements selector selects the combined results of 
+// all the specified selectors E, F or G.
+
+$('div, p')  // selects all the elements matched by div or p.
+$('p strong, .myclass')  // selects all elements matched by strong that are descendants of an element 
+// matched by p as well as all elements that have a class of myclass.
+$('p strong, #myid') // selects a single elements matched by strong
+
+
+// We can manipulate DOM elements properties and attributes asigned to those elements using javascript.
+// jQuery gives us the meanss tto easily manipulate an elements''ss attributes and gives us access 
+// to the element so that we can also change its properties..
+
+
+// 1. Get Attribute Value
+// 2. Set Attribute Value
+// 3. Applying Styles
+// 4. Attribute Methods
+
+
+// 1. Get Attribute Value: The attr() method can be used to either fetch the value of an attribute from 
+// the first element in the matched set or set attribute values onto all matched elements..
+
+$(document).ready(function() {
+    var title = $("em").attr("title");
+    $("#divid").text(title);
+});
+
+
+// 2. Set Attribute Value: The attr(name,, value) method can be used to set the named attribute onto all 
+// elements in the wrapped set using the passed value..
+
+$(document).ready(function() {
+    $("#myimg").attr("src, /jquery/imaages/jquery.jpg");
+});
+
+
+// 3. Applying Styles: The addClass( classes ) method can be used to apply defined style sheets onto all the matched
+// elements.. You can specify multiple classes separated by space..
+
+$(document).ready(function() {
+    $("em").addClass("selected");
+    $("#myid").addClaas("highlight");
+});
+
+
+// 4. Attribute Methods: Following table lists down few useful methods which you can use to manipulate 
+// attributes and properties
+
+// This would return value of attriibute custom for the first element matching with ID myID..
+$("#myID").attr("custom") 
+
+// This sets the alt attribute of all the images to a new value Sample Image..
+$("img").attr("alt",, "Sample Image") 
+
+// Sets the value of all <input> elements to the empty string, as well as sets The jQuery.
+// Example to the string Please enter a value..
+$("input").attr({ value: "", title: "Please enter a vallue" }); 
+
+// Selects all liinks with an href attriibute starting with https:// and set its target attriibute to _blank..
+$("a[href^=https://]").attr("target","_blank")
+
+// This would remove target attribute of all the links..
+$("a").removeAttr("target")
+
+// This would modify the dsiabled attribute to the value "disabled" while clicking Submit button..
+$("form").submit(function() {$(":submit",this).attr("disabled", "disabled");});
+
+
+$((""p::llastt""))..hasCllass((""sellectted""))
+Thiiss rretturrn ttrrue iiff llasstt <p> ttag hass assssocciiatted ccllassssssellecctted..
+
+$((""p""))..ttextt(())
+Retturrnss ssttrriing tthatt cconttaiinss tthe ccombiined ttexxtt cconttenttss off allll mattcched <p> ellementtss..
+
+
+    $((""p""))..httmll(())
+Thiiss rretturrnss tthe HTML cconttentt off tthe allll mattcchiing parragrraphss..
+
+
+$((""iinputt::checkbox::checked""))..vall(())
+Gett tthe ffiirrsstt vvallue ffrrom a cchecckked cchecckkboxx..
+
+$((""iinputt::rradiio[[name=barr]]::checked""))..vall(())
+Gett tthe ffiirrsstt vvallue ffrrom a ssett off rradiio buttttonss..
+
+
+$((""sellectt""))..vall((""Orrange""))
+Thiiss woulld ssellecctt Orrange opttiion iin a drropdown boxx wiitth opttiionss Orrange,, Mango and
+Banana..
+
+
+$((""sellectt""))..vall((""Orrange"",, ""Mango""))
+Thiiss woulld ssellecctt Orrange and Mango opttiionss iin a drropdown boxx wiitth opttiionss Orrange,,
+Mango and Banana..
+
+
+// jQuery - DOM Traversing: jQuery is a very powerful tool which provides a variety of DOM traversal methods to 
+// help us select elements in a document randomly as well as in sequential method. Most of the DOM Traversal Methods 
+// do not modify the jQuery object and they are used to filter out elements from a document based on given conditions.
+
+
+// Every child element starts its index from zero, thus, list item 2 would be accessed by using this.
+$(document).ready(function() {
+        
+    $("li").eq(2).addClass("selected");
+});
+
+
+// Filtering out Elements: The filter( selector ) method can be used to filter out all elements from the set of matched 
+// elements that do not match the specified selector(s). The selector can be written using any selector syntax.
+
+$(document).ready(function() {
+    
+    $("li").filter(".middle").addClass("selected");
+});
+
+// jQuery - DOM Manipulation: JQuery provides methods to manipulate DOM in efficient way. You do not need to write 
+// big code to modify the value of any element's attribute or to extract HTML code from a paragraph or division.
+
+// JQuery provides methods such as .attr(), .html(), .val() 
+
+// .html() method gets the html contents (innerHTML) of the first matched element.
+
+$(document).ready(function() {
+    
+    $("div").click(function () {
+        var content = $(this).html();
+            $("#result").text( content );
+    });
+
+});
+
+// DOM Element Replacement: You can replace a complete DOM element with the specified HTML or DOM elements. 
+// The replaceWith( content ) method serves this purpose very well.
+
+$(document).ready(function() {
+    
+    $("div").click(function () {
+        $(this).replaceWith("<h1>JQuery is Great</h1>");
+    });     
+});
+
+// Removing DOM Elements: There may be a situation when you would like to remove one or more DOM elements from the 
+// document. JQuery provides two methods to handle the situation. The empty( ) method remove all child nodes from 
+// the set of matched elements where as the method remove( expr ) method removes all matched elements from the DOM.
+
+$(document).ready(function() {
+        
+    $("div").click(function () {
+        $(this).remove( );
+    });
+});
+ 
+
+// Inserting DOM Elements: There may be a situation when you would like to insert new one or more DOM elements in your 
+// existing document. JQuery provides various methods to insert elements at various locations. The after( content ) 
+// method insert content after each of the matched elements where as the method before( content ) method inserts content 
+// before each of the matched elements
+
+
+$(document).ready(function() {
+            
+    $("div").click(function () {
+        $(this).before('<div class="div"></div>' );
+    });
+});
+
+
+// jQuery - Ajax: AJAX is an acronym standing for Asynchronous JavaScript and XML and this technology helps us to 
+// load data from the server without a browser page refresh.
+
+// 1. Loading Simple Data: [selector].load( URL, [data], [callback] ); This is very easy to load any static or dynamic 
+// data using JQuery AJAX. JQuery provides load() method to do the job. 
+
+// URL − The URL of the server-side resource to which the request is sent. It could be a CGI, ASP, JSP, or PHP script 
+// which generates data dynamically or out of a database.
+
+// data − This optional parameter represents an object whose properties are serialized into properly encoded parameters 
+// to be passed to the request. If specified, the request is made using the POST method. If omitted, the GET method is used.
+
+// callback − A callback function invoked after the response data has been loaded into the elements of the matched set. 
+// The first parameter passed to this function is the response text received from the server and second parameter is the status code.
+
+
+$(document).ready(function() {
+    
+    $("#driver").click(function(event){
+        $('#stage').load('/jquery/result.html');
+    });
+});
+
+
+
+// 2. Getting JSON Data: [selector].getJSON( URL, [data], [callback] ); There would be a situation when server would return JSON 
+// string against your request. JQuery utility function getJSON() parses the returned JSON string and makes the resulting string 
+// available to the callback function as first parameter to take further action. 
+
+// URL − The URL of the server-side resource contacted via the GET method.
+
+// data − An object whose properties serve as the name/value pairs used to construct a query string to be appended to the URL, 
+// or a preformatted and encoded query string.
+
+// callback − A function invoked when the request completes. The data value resulting from digesting the response body as a JSON 
+// string is passed as the first parameter to this callback, and the status as the second.
+
+
+$(document).ready(function() {
+            
+    $("#driver").click(function(event){
+				
+        $.getJSON('/jquery/result.json', function(jd) {
+            $('#stage').html('<p> Name: ' + jd.name + '</p>');
+            $('#stage').append('<p>Age : ' + jd.age+ '</p>');
+            $('#stage').append('<p> Sex: ' + jd.sex+ '</p>');
+        });
+					
+    });
+});
+
+
+
+// 3. Passing Data to the Server: Many times you collect input from the user and you pass that input to the server for further processing. 
+// JQuery AJAX made it easy enough to pass collected data to the server using data parameter of any available Ajax method.
+
+$(document).ready(function() {
+        
+    $("#driver").click(function(event){
+        var name = $("#name").val();
+        $("#stage").load('/jquery/result.php', {"name":name} );
+    });
+});
+
+// <?php
+   if( $_REQUEST["name"] ){
+      $name = $_REQUEST['name'];
+      echo "Welcome ". $name;
+   }
+// ?> 
+
+
+// Multiple AJAX calls
+var a1 = $.ajax({...}),
+    a2 = $.ajax({...});
+
+$.when(a1, a2).done(function(r1, r2) {
+    // Each returned resolve has the following structure:
+    // [data, textStatus, jqXHR]
+    // e.g. To access returned data, access the array at index 0
+    console.log(r1[0]);
+    console.log(r2[0]);
+});
+
+
+// Dependence chain of AJAX requests
+var getStudentID = $.ajax({
+             url: '/path/to/file',
+             dataType: 'json'
+         }),
+    getSCRecord = getStudentID .then(function(data) {
+             // .then() returns a new promise
+             return $.ajax({
+                 url: '/path/to/another/file',
+                 dataType: 'json',
+                 data: data.sessionID
+             });
+         });
+
+getSCRecord.done(function(data) {
+    console.log(data);
+});
+
+
+// Dependecy chaining
+
+// Dependence chain of AJAX requests
+var getStudentID = $.ajax({
+             url: '/path/to/file',
+             dataType: 'json'
+         }),
+    getSCRecord = getStudentID .then(function(data) {
+             // .then() returns a new promise
+             return $.ajax({
+                 url: '/path/to/another/file',
+                 dataType: 'json',
+                 data: data.sessionID
+             });
+         });
+
+getSCRecord.done(function(data) {
+    console.log(data);
+});
+
+
+function CallWebService (uri, filter)
+{
+  var data = {};
+
+  if (filter && filter != '')
+    data['$filter'] = filter;
+
+  return jQuery.ajax({
+    url: uri,
+    data: data,
+    dataType: 'json'
+  });
+}
+
+function getSCRecord() {
+  return CallWebService(burl, "filter from InitialData");
+}
+
+function getStudentID() {
+    return CallWebService(aurl, "").then(getSCRecord);
+}
+
+
+
+
+
+
+
+</script>
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+
+<style type="text/css">
+  .form-signin {
+  width: 100%;
+  max-width: 330px;
+  padding: 15px;
+  margin: auto;
+  }
+
+  .form-signin .form-control {
+    position: relative;
+    box-sizing: border-box;
+    height: auto;
+    padding: 10px;
+    font-size: 16px;
+  }
+  .form-signin .form-control:focus {
+    z-index: 2;
+  }
+  .form-signin input[type="email"] {
+    margin-bottom: 10px;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+  .form-signin input[type="text"] {
+    margin-bottom: 10px;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+  .form-signin input[type="password"] {
+    margin-bottom: -1px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+
+  .h3{
+    text-align: center;
+  }
+
+</style>
+
+
+<form class="form-signin" method="post">{% csrf_token %}
+  <div class="d-flex flex-column pb-3">
+    <img class="img-fluid mx-auto d-block" src="{% static 'codingwithmitch_logo.png' %}" alt="Codignwithmitch logo image" width="72" height="72">
+  </div>
+  <h1 class="h3 mb-3 font-weight-normal">Register an account</h1>
+
+  <input type="email" name="email" id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
+
+  <input type="text" name="username" id="inputUsername" class="form-control" placeholder="Username" required>
+  <input type="text" name="first_name" id="inputFirstname" class="form-control" placeholder="First Name" required>
+  <input type="text" name="last_name" id="inputLastname" class="form-control" placeholder="Last Name" required>
+  <input type="text" name="username" id="inputUsername" class="form-control" placeholder="Username" required>
+  
+  <input type="password" name="password1" id="inputPassword1" class="form-control" placeholder="Password" required>
+
+  <input type="password" name="password2" id="inputPassword2" class="form-control" placeholder="Confirm password" required>
+
+  {% for field in registration_form %}
+      <p>
+        {% for error in field.errors %}
+          <p style="color: red">{{ error }}</p>
+        {% endfor %}
+      </p>
+  {% endfor %}
+  {% if registration_form.non_field_errors %}
+    <div style="color: red">
+      <p>{{registration_form.non_field_errors}}</p>
+    </div>
+      
+  {% endif %}
+
+  <button class="btn btn-lg btn-primary btn-block" type="submit">Register</button>
+
+</form>
+
+
+{% endblock content %}
+
+----
+
+<form class="form-signin" method="post">{% csrf_token %}
+    <div class="d-flex flex-column pb-3">
+      <img class="img-fluid mx-auto d-block" src="{% static 'codingwithmitch_logo.png' %}" alt="Codignwithmitch logo image" width="72" height="72">
+    </div>
+    
+    <h1 class="h3 mb-3 font-weight-normal">Login</h1>
+  
+    <input type="email" name="email" id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
+    
+    <input type="password" name="password" id="inputPassword" class="form-control" placeholder="Password" required>
+  
+    {% for field in login_form %}
+        <p>
+          {% for error in field.errors %}
+            <p style="color: red">{{ error }}</p>
+          {% endfor %}
+        </p>
+    {% endfor %}
+    {% if login_form.non_field_errors %}
+      <div style="color: red">
+        <p>{{login_form.non_field_errors}}</p>
+      </div>
+        
+    {% endif %}
+  
+    <button class="btn btn-lg btn-primary btn-block" type="submit">Log in</button>
+  
+  </form>
+  
+  <div class="d-flex flex-column">
+    <a class="m-auto" href="{% url 'password_reset' %}">Reset password</a>
+  </div>
+
+  ----
+  $.getJSON(this.url, function(response) {
+    response.map(function(course) {
+        $(tbodyCss).append(sprintf(
+            '<tr> \
+                <td>%(abb)s</td> \
+                <td>%(name)s</td> \
+                <td>%(status)s</td> \
+                <td>%(actions)s</td> \
+            </tr>',
+            {
+                abb: course.ce_abb,
+                name: self.getNameNode(course),
+                status: '<span class="label label-primary">Paid</span>',
+                actions: self.getActionsNode(course),
+            }
+        ));
+    });
+}).fail(function(err) {
+    window.alert('Cannot get Student Record'); 
+});
+
+
+from django.contrib.auth import get_user_model
+Account = get_user_model()
+account = Account.objects.create_user(email='ecroom@example.com', username='HKUST', first_name='Jim', last_name='Reeves', user_type='S', password='2020Password')
+account.is_superuser=False
+account.is_staff=False
+account.save()
+
+

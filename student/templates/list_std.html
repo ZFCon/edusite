@@ -1,0 +1,461 @@
+{% extends 'base3.html' %}
+{% load static %}
+{% block content %}
+
+<!-- Modal -->
+<div class="modal fade" id="studentFormModal" tabindex="-1" role="dialog" aria-labelledby="studentFormModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="studentFormModalLabel">Modal title</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <form role="form" id="studentForm" data-schools-url="{% url 'ajax_load_schools' %}"  data-depts-url="{% url 'ajax_load_depts' %}" data-deptcls-url="{% url 'ajax_load_deptcls' %}" novalidate>
+            <div class="row">
+                  <div class="col-sm-6">
+                      <div class="form-group">
+                          <label class="col-form-label" for="{{ form.std_fname.id_for_label }}">First Name</label>
+                          {{ form.std_fname }}
+                      </div>
+                  </div>
+                  <div class="col-sm-6">
+                      <div class="form-group">
+                          <label class="col-form-label" for="{{ form.std_lname.id_for_label }}">Last Name</label>
+                          {{ form.std_lname }}
+                      </div>
+                  </div>
+            </div>
+
+            <div class="row">
+                  <div class="col-sm-4">
+                      <div class="form-group">
+                          <label class="col-form-label" for="{{ form.std_inst.id_for_label }}">Institution</label>
+                          {{ form.std_inst }}
+                      </div>
+                  </div>
+                  <div class="col-sm-4">
+                      <div class="form-group">
+                          <label class="col-form-label" for="{{ form.std_sch.id_for_label }}">School</label>
+                          {% for school in schools %}
+                          <option value="{{ school.sch_id }}">{{ school.sch_name }}</option>
+                          {% endfor %}
+                          {{ form.std_sch }}
+                      </div>
+                  </div>
+                  <div class="col-sm-4">
+                      <div class="form-group">
+                          <label class="col-form-label" for="{{ form.std_dept.id_for_label }}">Department</label>
+                         {{ form.std_dept }}
+                      </div>
+                  </div>
+            </div>
+
+            <div class="row">
+                  <div class="col-sm-4">
+                      <div class="form-group">
+                          <label class="col-form-label" for="{{ form.std_dptcls.id_for_label }}">Department Class</label>
+                          {{ form.std_dptcls }}
+                      </div>
+                  </div>
+                  <div class="col-sm-4">
+                      <div class="form-group">
+                          <label class="col-form-label" for="{{ form.std_abbr.id_for_label }}">Student ID</label>
+                          <input type="text" name="std_abbr" class="form-control" id="std-abbr" required="" placeholder="Student Abbreviation" maxlength="20">
+                      </div>
+                  </div>
+                  <div class="col-sm-4">
+                      <div class="form-group">
+                          <label class="col-form-label" for="{{ form.std_city.id_for_label }}">City</label>
+                          <input type="text" id="customer" name="customer" value="None" placeholder="Customer" class="form-control" required>
+                      </div>
+                  </div>
+            </div>          
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="save-student-form">Save changes</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="row wrapper border-bottom white-bg page-heading">
+  <div class="col-lg-10">
+      <h3></h3>
+      <ol class="breadcrumb">
+          <li class="breadcrumb-item">
+              <a href="{% url 'listinst' %}">Home</a>
+          </li>
+          <li class="breadcrumb-item active">
+              <strong>Students</strong>
+          </li>
+      </ol>
+  </div>
+</div>
+<div class="wrapper wrapper-content">
+  <div class="row">
+      <div class="col-lg-12">
+          <div class="row">
+            <div class="col-lg-12">
+                <button type="button" class="btn btn-primary btn-xs" id="create-new-student">New Student</button>
+                <p></p>
+            </div>
+          </div>
+      </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12">
+        <div class="ibox">
+            <div class="ibox-title">
+                <h2 class="font-bold">EESM 100 Class</h2>
+                <div class="ibox-tools">
+                    <div class="float-right social-action dropdown">
+                        <button data-toggle="dropdown" class="dropdown-toggle btn-white" aria-expanded="false">
+                            <i class="fa fa-angle-down"></i>
+                        </button>
+                        <ul class="dropdown-menu m-t-xs" x-placement="bottom-start" style="position: absolute; top: 24px; left: 0px; will-change: top, left;">
+                            <li><a class="dropdown-item" href="">New Lesson</a></li>
+                            <li><a class="dropdown-item" href="">New Assessment</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="ibox-content">
+                <table class="footable table table-stripped toggle-arrow-tiny" data-page-size="15" id="students-table">
+                    <thead>
+                        <tr>
+                            <th>SI</th>
+                            <th data-hide="phone">Student Name</th>
+                            <th data-hide="phone">CGPA</th>
+                            <th data-hide="phone">Class </th>
+                            <th data-hide="phone,tablet" >School</th>
+                            <th data-hide="phone">Status</th>
+                            <th class="text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="std-list"></tbody>
+
+                    <tfoot>
+                    <tr>
+                        <td colspan="7">
+                            <ul class="pagination float-right"></ul>
+                        </td>
+                    </tr>
+                    </tfoot>
+                </table>
+
+            </div>
+        </div>
+    </div>
+</div>
+  
+</div>
+  
+{% endblock %}
+
+{% block page_js %}
+<script type="text/javascript" src="{% static 'js/ajax-tools.js' %}"></script>
+<script type="text/javascript">
+
+    function Students() {
+        this.apiUrl = '/apiv1/students/';
+
+        this.setUpTableButtons = function() {
+            $(document).on('click', 'button.delete-student', (function(event) {
+                const studentId = $(event.target).attr('data-studentid');
+                this.deleteStudent(studentId);
+            }).bind(this));
+
+            $(document).on('click', 'button.edit-student', (function(event) {
+                const editButton = new ButtonWrapper(event.target);
+                editButton.loading();
+
+                const studentId = $(event.target).attr('data-studentid');
+                this.setUpeditStudent(editButton, studentId);
+            }).bind(this));
+        }
+
+        this.getStudents = function() {
+            console.log('Getting students');
+            const tbodyCss = '#students-table > tbody';
+            const self = this;
+
+            $(tbodyCss).empty();
+           
+            $.getJSON(this.apiUrl, function(response) {
+                response.results.map(function(student) {
+                    $(tbodyCss).append(sprintf(
+                        '<tr> \
+                            <td>%(sid)s</td> \
+                            <td>%(name)s</td> \
+                            <td>%(cgpa)s</td> \
+                            <td>%(cls)s</td> \
+                            <td>%(school)s</td> \
+                            <td>%(status)s</td> \
+                            <td>%(actions)s</td> \
+                        </tr>',
+                        {
+                            sid: student.std_abbr,
+                            name: self.getNameNode(student),
+                            cgpa: 4.5,
+                            cls: student.std_dptcls,
+                            school: student.std_sch,
+                            status: '<span class="label label-primary">Pending</span>',
+                            actions: self.getActionsNode(student),
+                        }
+                    ));
+                });
+            }).fail(function(err) {
+                window.alert('Cannot get students'); 
+            });
+        }
+
+        this.getNameNode = function(student) {
+            return sprintf('<a href="view/%s">%s %s</a>', student.std_id, student.std_fname, student.std_lname);
+        }
+
+        this.getActionsNode = function(student) {
+            const node = sprintf('\
+                <div class="btn-group pull-right"> \
+                    <a href="/Student/%(studentId)s/view/" class="btn-white btn btn-xs" target="_blank">View</a> \
+                    <button data-studentId="%(studentId)s" class="btn-white btn btn-xs edit-student">Edit</button> \
+                    <button data-studentId="%(studentId)s" class="btn-white btn btn-xs delete-student">Delete</button> \
+                </div>',
+                {
+                    studentId: student.std_id
+                }
+            );
+
+            return node;
+        }
+
+        this.pullStudents = function() {
+            window.setInterval((function() {
+                this.getStudents();
+
+            }).bind(this), 1000 * 60);
+        }
+
+        this.studentFormIsValid = function() {
+
+            const form = document.getElementById('studentForm');
+            form.classList.remove('was-validated');
+
+            if (form.checkValidity() === true) {
+                const data = {};
+                data.std_inst = $('#std-inst').val();
+                data.std_sch = $('#std-sch').val();
+                data.std_dept = $('#std-dept').val();
+                data.std_dptcls = $('#std-dptcls').val();
+                data.std_abbr = $('input[name="std_abbr"]').val();
+                data.std_fname = $('input[name="std_fname"]').val();
+                data.std_lname = $('input[name="std_lname"]').val();
+
+                return data;
+
+            } else {
+                form.classList.add('was-validated');
+            }
+        }
+
+        this.clearStudentForm = function() {
+            $('#std-inst').val(null);
+            $('#std-sch').val(null);
+            $('#std-dept').val(null);
+            $('#std-dptcls').val(null);
+            $('input[name="std_abbr"]').val(null);
+            $('input[name="std_fname"]').val(null);
+            $('input[name="std_lname"]').val(null);
+            $('#customer').val(null);
+        }
+
+        this.createStudent = function(button) {
+            console.log('Create student');
+
+            const newStudentData = this.studentFormIsValid();
+
+            if (newStudentData) {
+                $.ajax({
+                    url: this.apiUrl,
+                    method: 'POST',
+                    context: this,
+                    data: newStudentData,
+                    success: function(res) {
+                        $('#studentFormModal').modal('hide');
+                        this.clearStudentForm();
+                        this.getStudents();
+                    },
+                    error: function(err) {
+                        if (err.hasOwnProperty('responseJSON')) {
+                            console.log(err.responseJSON);
+                            const errKey = Object.keys(err.responseJSON)[0];
+                            window.alert(sprintf('Cannot create studen: %s', err.responseJSON[errKey][0]));
+                        } else {
+                            window.alert('Cannot create student.');
+                        }
+                    },
+                    complete: function() {
+                        button.reset();
+                    }
+                });
+            } else {
+                button.reset();
+            }
+        }
+
+        this.updateStudent = function(button, studentId) {
+            console.log('Update student');
+
+            const newStudentData = this.studentFormIsValid();
+            console.log(newStudentData);
+
+            if (newStudentData) {
+                console.log('Update student: ', studentId);
+                const url = sprintf('%s%s/', this.apiUrl, studentId);
+
+                $.ajax({
+                    context: this,
+                    url: url,
+                    method: 'PATCH',
+                    data: newStudentData,
+                    success: function(resp) {
+                        $('#studentFormModal').modal('hide');
+                        this.clearStudentForm();
+                        this.getStudents();
+                        $('#save-student-form').attr('data-studentid', null);
+                    },
+                    error: function(err) {
+                        if (err.hasOwnProperty('responseJSON')) {
+                            console.log(err.responseJSON);
+                            const errKey = Object.keys(err.responseJSON)[0];
+                            window.alert(sprintf('Cannot update student: %s', err.responseJSON[errKey][0]));
+                        } else {
+                            window.alert('Cannot create student.');
+                        }
+                    },
+                    complete: function() {
+                        button.reset();
+                    }
+                });
+
+            } else {
+                button.reset();
+            }
+        }
+
+        this.deleteStudent = function(studentId) {
+            console.log('Delete student: ', studentId);
+            const url = sprintf('%s%s', this.apiUrl, studentId);
+
+            console.log(url);
+
+            $.ajax({
+                context: this,
+                url: url,
+                method: 'DELETE',
+                success: function(resp) {
+                    this.getStudents();
+                },
+                error: function(resp) {
+                    window.alert('Cannot remove student');
+                }
+            });
+        }
+
+        this.setUpeditStudent = function(button, studentId) {
+            console.log('Edit student: ', studentId);
+            const url = sprintf('%s%s', this.apiUrl, studentId);
+            console.log(url);
+
+            $('#save-student-form').attr('data-studentid', studentId);
+
+            $('std-inst').val(null);
+            $('std-inst').change();
+
+            $.getJSON(url, function(response) {
+                console.log(response);
+                button.reset();
+
+                $('#studentFormModalLabel').text('Update student');
+                $('#studentFormModal').modal('show');
+
+                $('input[name="std_abbr"]').val(response.std_abbr);
+                $('input[name="std_fname"]').val(response.std_fname);
+                $('input[name="std_lname"]').val(response.std_lname);
+                $('#customer').val('none');
+
+                $('#std-inst').val(response.std_inst);
+                $('#std-inst').change();
+
+                window.setTimeout(function() {
+                    $('#std-sch').val(response.std_sch);
+                    $('#std-sch').change();
+
+                    window.setTimeout(function() {
+                        $('#std-dept').val(response.std_dept);
+                        $('#std-dept').change();
+
+                        window.setTimeout(function() {
+                            $('#std-dptcls').val(response.std_dptcls);
+                            $('#std-dptcls').change();
+                        }, 800);
+
+                    }, 800);
+
+                }, 800);
+            });
+        }
+    }
+
+    function ButtonWrapper(buttonObj) {
+        this.originText = $(buttonObj).text();
+
+        this.loading = function() {
+            $(buttonObj).attr('disabled', true);
+            $(buttonObj).html('<span class="spinner-border spinner-border-sm"></span> Loading...');
+        }
+
+        this.reset = function() {
+            $(buttonObj).text(this.originText);
+            $(buttonObj).attr('disabled', false);
+        }
+    }
+
+    $(document).ready(function(event) {
+        const students = new Students();
+
+        students.setUpTableButtons();
+        students.getStudents();
+        // students.pullStudents();
+
+        $('#create-new-student').on('click', function(event) {
+            $('#save-student-form').attr('data-studentid', null);
+            students.clearStudentForm();
+            $('#studentFormModalLabel').text('Create new student');
+            $('#studentFormModal').modal('show');
+        });
+
+        $('#save-student-form').on('click', function(event) {
+            const saveButton = new ButtonWrapper(event.target);
+            saveButton.loading();
+
+            const studentId = $(this).attr('data-studentid');
+
+            if (studentId) {
+                console.log('Updating');
+                students.updateStudent(saveButton, studentId);
+            } else {
+                console.log('Creating');
+                students.createStudent(saveButton);
+            }
+        });
+    });
+</script>
+{% endblock %}

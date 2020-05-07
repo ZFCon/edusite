@@ -1,0 +1,382 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<!-- Modal -->
+<div class="modal fade" id="dptclsFormModal" tabindex="-1" role="dialog" aria-labelledby="dptclsFormModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="dptclsFormModalLabel">Modal title</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+  
+        <div class="modal-body">
+          <form role="form" id="dptclsForm" novalidate>
+              <div class="row">
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label class="col-form-label" for="{{ form.dcls_abb.id_for_label }}">Abbreviation</label>
+                            {{ form.dcls_abb }}
+                        </div>
+                    </div>
+                    <div class="col-sm-9">
+                        <div class="form-group">
+                            <label class="col-form-label" for="{{ form.dcls_name.id_for_label }}">Class Name</label>
+                            {{ form.dcls_name }}
+                        </div>
+                    </div>
+              </div>
+          </form>
+        </div>
+  
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" id="save-dptcls-form">Save changes</button>
+        </div>
+  
+      </div>
+    </div>
+</div>
+<!-- Modal -->
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h3></h3>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'list_inst' %}">Home</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'list_inst' %}">Institutes</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'list_inst' %}">Schools</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'list_inst' %}">Departments</a>
+            </li>
+            <li class="breadcrumb-item active">
+                <strong>Classes</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-2">
+
+    </div>
+</div>
+
+<div class="wrapper wrapper-content">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="row">
+              <div class="col-lg-12">
+                  <button type="button" class="btn btn-primary btn-xs" id="create-new-dptcls">New Class</button>
+                  <p></p>
+              </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+      <div class="col-lg-9">
+          <div class="ibox">
+              <div class="ibox-content">
+                  <table class="footable table table-stripped toggle-arrow-tiny" data-page-size="15" id="dptclsses-table">
+                      <thead>
+                          <tr>
+                              <th>ID</th>
+                              <th data-hide="phone">Class Name</th>
+                              <th data-hide="phone">Status</th>
+                              <th class="text-right">Action</th>
+                          </tr>
+                      </thead>
+                      <tbody id="dept-list"></tbody>
+  
+                      <tfoot>
+                      <tr>
+                          <td colspan="7">
+                              <ul class="pagination float-right"></ul>
+                          </td>
+                      </tr>
+                      </tfoot>
+                  </table>
+  
+              </div>
+          </div>
+      </div>
+  </div>
+    
+  </div>
+{% endblock %}
+
+{% block page_js %}
+<script type="text/javascript" src="{% static 'js/ajax-tools.js' %}"></script>
+<script type="text/javascript">
+
+    function Dptclsses() {
+        this.apiUrl = '/api/inst/';
+        var newURL = window.location.pathname.split('/');
+        console.log(newURL[6]);
+        this.instId = newURL[2];
+        this.schId = newURL[4];
+        this.dptId = newURL[6];
+        this.url = sprintf('%s%s%s%s%s%s%s', this.apiUrl, this.instId, '/sch/', this.schId, '/dept/', this.dptId, '/dptcls/');
+
+        this.setUpTableButtons = function() {
+            $(document).on('click', 'button.delete-dptcls', (function(event) {
+                const dptclsId = $(event.target).attr('data-dptclsid');
+                this.deleteDptcls(dptclsId);
+            }).bind(this));
+
+            $(document).on('click', 'button.edit-dptcls', (function(event) {
+                const editButton = new ButtonWrapper(event.target);
+                editButton.loading();
+
+                const dptclsId = $(event.target).attr('data-dptclsid');
+                this.setUpeditDptcls(editButton, dptclsId);
+            }).bind(this));
+        }
+
+        this.getDptclsses = function() {
+            console.log(this.url);
+
+            const tbodyCss = '#dptclsses-table > tbody';
+            const self = this;
+
+            $(tbodyCss).empty();
+           
+            $.getJSON(this.url, function(response) {
+                console.log(response);
+                response.map(function(dptcls) {
+                    $(tbodyCss).append(sprintf(
+                        '<tr> \
+                            <td>%(abb)s</td> \
+                            <td>%(name)s</td> \
+                            <td>%(status)s</td> \
+                            <td>%(actions)s</td> \
+                        </tr>',
+                        {
+                            abb: dptcls.dcls_abb,
+                            name: self.getNameNode(dptcls),
+                            status: '<span class="label label-primary">Paid</span>',
+                            actions: self.getActionsNode(dptcls),
+                        }
+                    ));
+                });
+            }).fail(function(err) {
+                window.alert('Cannot get Class'); 
+            });
+        }
+
+        this.getNameNode = function(dptcls) {
+            return sprintf('<a href="%s/courses/">%s</a>', dptcls.id, dptcls.dcls_name);
+        }
+
+        this.getActionsNode = function(dptcls) {
+            const node = sprintf('\
+                <div class="btn-group pull-right"> \
+                    <button data-dptclsId="%(dptclsId)s" class="btn-white btn btn-xs edit-dptcls">Edit</button> \
+                    <button data-dptclsId="%(dptclsId)s" class="btn-white btn btn-xs delete-dptcls">Delete</button> \
+                </div>',
+                {
+                    dptclsId: dptcls.id
+                }
+            );
+
+            return node;
+        }
+
+        this.pullDptclsses = function() {
+            window.setInterval((function() {
+                this.getDptclsses();
+
+            }).bind(this), 1000 * 60);
+        }
+
+        this.dptclsFormIsValid = function() {
+
+            const form = document.getElementById('dptclsForm');
+            form.classList.remove('was-validated');
+
+            if (form.checkValidity() === true) {
+                const data = {};
+                data.dcls_dpt = this.dptId;
+                data.dcls_abb = $('input[name="dcls_abb"]').val();
+                data.dcls_name = $('input[name="dcls_name"]').val();
+
+                console.log(data);
+
+                return data;
+
+            } else {
+                form.classList.add('was-validated');
+            }
+        }
+
+        this.clearDptclsForm = function() {
+            $('input[name="dcls_abb"]').val(null);
+            $('input[name="dcls_name"]').val(null);
+        }
+
+        this.createDptcls = function(button) {
+            console.log('Create Class');
+
+            const newDptclsData = this.dptclsFormIsValid();
+
+            if (newDptclsData) {
+                $.ajax({
+                    url: this.url,
+                    method: 'POST',
+                    context: this,
+                    data: newDptclsData,
+                    success: function(res) {
+                        $('#dptclsFormModal').modal('hide');
+                        this.clearDptclsForm();
+                        this.getDptclsses();
+                    },
+                    error: function(err) {
+                        if (err.hasOwnProperty('responseJSON')) {
+                            console.log(err.responseJSON);
+                            const errKey = Object.keys(err.responseJSON)[0];
+                            window.alert(sprintf('Cannot create Class: %s', err.responseJSON[errKey][0]));
+                        } else {
+                            window.alert('Cannot Create Class.');
+                        }
+                    },
+                    complete: function() {
+                        button.reset();
+                    }
+                });
+            } else {
+                button.reset();
+            }
+        }
+
+        this.updateDptcls = function(button, dptclsId) {
+            console.log('Update Class');
+
+            const newDptclsData = this.dptclsFormIsValid();
+            console.log(newDptclsData);
+
+            if (newDptclsData) {
+                console.log('Update Class: ', dptclsId);
+                const surl = sprintf('%s%s/', this.url, dptclsId);
+
+                $.ajax({
+                    context: this,
+                    url: surl,
+                    method: 'PUT',
+                    data: newDptclsData,
+                    success: function(resp) {
+                        $('#dptclsFormModal').modal('hide');
+                        this.clearDptclsForm();
+                        this.getDptclsses();
+                        $('#save-dptcls-form').attr('data-dptclsid', null);
+                    },
+                    error: function(err) {
+                        if (err.hasOwnProperty('responseJSON')) {
+                            console.log(err.responseJSON);
+                            const errKey = Object.keys(err.responseJSON)[0];
+                            window.alert(sprintf('Cannot update class: %s', err.responseJSON[errKey][0]));
+                        } else {
+                            window.alert('Cannot create class.');
+                        }
+                    },
+                    complete: function() {
+                        button.reset();
+                    }
+                });
+
+            } else {
+                button.reset();
+            }
+        }
+
+        this.deleteDptcls = function(dptclsId) {
+            console.log('Delete Class: ', dptclsId);
+            const surl = sprintf('%s%s', this.url, dptclsId);
+
+            console.log(surl);
+
+            $.ajax({
+                context: this,
+                url: surl,
+                method: 'DELETE',
+                success: function(resp) {
+                    this.getDptclsses();
+                },
+                error: function(resp) {
+                    window.alert('Cannot Remove Class');
+                }
+            });
+        }
+
+        this.setUpeditDptcls = function(button, dptclsId) {
+            console.log('Edit Class: ', dptclsId);
+            const surl = sprintf('%s%s', this.url, dptclsId);
+            console.log(surl);
+
+            $('#save-dptcls-form').attr('data-dptclsid', dptclsId);
+
+            $.getJSON(surl, function(response) {
+                console.log(response);
+                button.reset();
+
+                $('#dptclsFormModalLabel').text('Update Class');
+                $('#dptclsFormModal').modal('show');
+
+                $('input[name="dcls_abb"]').val(response.dcls_abb);
+                $('input[name="dcls_name"]').val(response.dcls_name);
+
+
+            });
+        }
+    }
+
+    function ButtonWrapper(buttonObj) {
+        this.originText = $(buttonObj).text();
+
+        this.loading = function() {
+            $(buttonObj).attr('disabled', true);
+            $(buttonObj).html('<span class="spinner-border spinner-border-sm"></span> Loading...');
+        }
+
+        this.reset = function() {
+            $(buttonObj).text(this.originText);
+            $(buttonObj).attr('disabled', false);
+        }
+    }
+
+    $(document).ready(function(event) {
+        const dptclsses = new Dptclsses();
+
+        dptclsses.setUpTableButtons();
+        dptclsses.getDptclsses();
+        dptclsses.pullDptclsses();
+
+        $('#create-new-dptcls').on('click', function(event) {
+            // $('#save-institute-form').attr('data-instituteid', null);
+            // students.clearInstituteForm();
+            $('#dptclsFormModalLabel').text('Create new Class');
+            $('#dptclsFormModal').modal('show');
+        });
+
+        $('#save-dptcls-form').on('click', function(event) {
+            const saveButton = new ButtonWrapper(event.target);
+            saveButton.loading();
+
+            const dptclsId = $(this).attr('data-dptclsid');
+
+            if (dptclsId) {
+                console.log('Updating');
+                dptclsses.updateDptcls(saveButton, dptclsId);
+            } else {
+                console.log('Creating');
+                dptclsses.createDptcls(saveButton);
+            }
+        });
+    });
+</script>
+{% endblock %}

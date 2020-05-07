@@ -1,0 +1,121 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    {% block title %}<title>CommonBooks</title>{% endblock %}
+
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'font-awesome/css/font-awesome.css' %}" rel="stylesheet">
+
+    <link href="{% static 'css/plugins/jsTree/style.min.css' %}" rel="stylesheet">
+
+    <link href="{% static 'css/plugins/iCheck/custom.css' %}" rel="stylesheet">
+
+    <link href="{% static 'css/animate.css' %}" rel="stylesheet">
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+
+</head>
+
+<body>
+
+<div id="wrapper">
+
+    {% block navbar %}
+    <nav class="navbar-default navbar-static-side" role="navigation">
+        <div class="sidebar-collapse">
+            <ul class="nav metismenu" id="side-menu">
+                <li class="nav-header">
+                    {% if request.user.is_authenticated %}
+                    <div class="dropdown profile-element">
+                        <a data-toggle="dropdown" class="dropdown-toggle" href="#">
+                            <span class="block m-t-xs font-bold">{{ request.user.username }}</span>
+                            <span class="text-muted text-xs block">menu <b class="caret"></b></span>
+                        </a>
+                        <ul class="dropdown-menu animated fadeInRight m-t-xs">
+                            <li><a class="dropdown-item" href="{% url 'logout' %}">My account</a></li>
+                            <li><a class="dropdown-item" href="{% url 'logout' %}">Change Password</a></li>
+                            <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
+                        </ul>
+                    </div>
+                    {% else %}
+                    <form class="form-inline ml-auto">
+                        <a href="{% url 'login' %}" class="btn btn-outline-secondary">Log in</a>
+                        <a href="{% url 'register' %}" class="btn btn-primary ml-2">Sign up</a>
+                      </form>
+                    {% endif %}
+                    <div class="logo-element">
+                        IN+
+                    </div>
+                </li>
+                <li class="active">
+                    <a href="{% url 'list_inst' %}"><i class="fa fa-th-large"></i> <span class="nav-label">Institutions</span></a>
+                </li>
+                <li>
+                    <a href="{% url 'list_std' %}"><i class="fa fa-th-large"></i> <span class="nav-label">Students</span></a>
+                </li>
+                <li>
+                    <a href="#"><i class="fa fa-th-large"></i> <span class="nav-label">Teachers</span></a>
+                </li>
+                <li>
+                    <a href="#"><i class="fa fa-th-large"></i> <span class="nav-label">Assessments</span></a>
+                </li>
+                <li>
+                    <a href="#"><i class="fa fa-th-large"></i> <span class="nav-label">Books</span></a>
+                </li>
+            </ul>
+
+        </div>
+    </nav>
+    {% endblock %}
+
+    
+    <div id="page-wrapper" class="gray-bg">
+
+       
+        {% block content %}
+    
+        {% endblock %}
+        <div class="footer">
+            <div class="pull-right">
+                10GB of <strong>250GB</strong> Free.
+            </div>
+            <div>
+                <strong>Copyright </strong> ecroom Technologies Company Ltd &copy; 2019-2020
+            </div>
+        </div>
+
+    </div>
+    
+<!-- Mainly scripts -->
+<script src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
+<script src="{% static 'js/popper.min.js' %}"></script>
+<script src="{% static 'js/bootstrap.min.js' %}"></script>
+
+<script src="{% static 'js/plugins/metisMenu/jquery.metisMenu.js' %}"></script>
+<script src="{% static 'js/plugins/slimscroll/jquery.slimscroll.min.js' %}"></script>
+
+<!-- Custom and plugin javascript -->
+<script src="{% static 'js/inspinia.js' %}"></script>
+<script src="{% static 'js/plugins/pace/pace.min.js' %}"></script>  
+
+<script src="{% static 'js/plugins/iCheck/icheck.min.js' %}"></script>
+
+
+</div>
+
+
+
+
+{% block page_js %}{% endblock %}
+</body>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/sprintf/1.1.2/sprintf.min.js"></script>
+
+</html>

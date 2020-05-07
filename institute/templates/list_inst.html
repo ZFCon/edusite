@@ -1,0 +1,363 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<!-- Modal -->
+<div class="modal fade" id="instituteFormModal" tabindex="-1" role="dialog" aria-labelledby="instituteFormModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="instituteFormModalLabel">Modal title</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+  
+        <div class="modal-body">
+          <form role="form" id="instituteForm" novalidate>
+              <div class="row">
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label class="col-form-label" for="{{ form.abb.id_for_label }}">Abbreviation</label>
+                            {{ form.abb }}
+                        </div>
+                    </div>
+                    <div class="col-sm-9">
+                        <div class="form-group">
+                            <label class="col-form-label" for="{{ form.name.id_for_label }}">Institution Name</label>
+                            {{ form.name }}
+                        </div>
+                    </div>
+              </div>
+          </form>
+        </div>
+  
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" id="save-institute-form">Save changes</button>
+        </div>
+  
+      </div>
+    </div>
+</div>
+<!-- Modal -->
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h3></h3>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'list_inst' %}">Home</a>
+            </li>
+            <li class="breadcrumb-item active">
+                <strong>Institutions</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-2">
+
+    </div>
+</div>
+
+<div class="wrapper wrapper-content">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="row">
+              <div class="col-lg-12">
+                  <button type="button" class="btn btn-primary btn-xs" id="create-new-institute">New Institute</button>
+                  <p></p>
+              </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+      <div class="col-lg-9">
+          <div class="ibox">
+              <div class="ibox-content">
+                  <table class="footable table table-stripped toggle-arrow-tiny" data-page-size="15" id="institutes-table">
+                      <thead>
+                          <tr>
+                              <th>ID</th>
+                              <th data-hide="phone">Institution Name</th>
+                              <th data-hide="phone">Status</th>
+                              <th class="text-right">Action</th>
+                          </tr>
+                      </thead>
+                      <tbody id="inst-list"></tbody>
+  
+                      <tfoot>
+                      <tr>
+                          <td colspan="7">
+                              <ul class="pagination float-right"></ul>
+                          </td>
+                      </tr>
+                      </tfoot>
+                  </table>
+  
+              </div>
+          </div>
+      </div>
+  </div>
+    
+  </div>
+{% endblock %}
+
+{% block page_js %}
+<script type="text/javascript" src="{% static 'js/ajax-tools.js' %}"></script>
+<script type="text/javascript">
+
+    function Institutes() {
+        this.apiUrl = '/api/inst/';
+
+        this.setUpTableButtons = function() {
+            $(document).on('click', 'button.delete-institute', (function(event) {
+                const instituteId = $(event.target).attr('data-instituteid');
+                this.deleteInstitute(instituteId);
+            }).bind(this));
+
+            $(document).on('click', 'button.edit-institute', (function(event) {
+                const editButton = new ButtonWrapper(event.target);
+                editButton.loading();
+
+                const instituteId = $(event.target).attr('data-instituteid');
+                this.setUpeditInstitute(editButton, instituteId);
+            }).bind(this));
+        }
+
+        this.getInstitutes = function() {
+            console.log('Getting Institute');
+            const tbodyCss = '#institutes-table > tbody';
+            const self = this;
+
+            $(tbodyCss).empty();
+           
+            $.getJSON(this.apiUrl, function(response) {
+                console.log(response);
+                response.map(function(institute) {
+                    $(tbodyCss).append(sprintf(
+                        '<tr> \
+                            <td>%(abb)s</td> \
+                            <td>%(name)s</td> \
+                            <td>%(status)s</td> \
+                            <td>%(actions)s</td> \
+                        </tr>',
+                        {
+                            abb: institute.abb,
+                            name: self.getNameNode(institute),
+                            status: '<span class="label label-primary">Paid</span>',
+                            actions: self.getActionsNode(institute),
+                        }
+                    ));
+                });
+            }).fail(function(err) {
+                window.alert('Cannot get institutes'); 
+            });
+        }
+
+        this.getNameNode = function(institute) {
+            return sprintf('<a href="institute/%s/schools/">%s</a>', institute.id, institute.name);
+        }
+
+        this.getActionsNode = function(institute) {
+            const node = sprintf('\
+                <div class="btn-group pull-right"> \
+                    <button data-instituteId="%(instituteId)s" class="btn-white btn btn-xs edit-institute">Edit</button> \
+                    <button data-instituteId="%(instituteId)s" class="btn-white btn btn-xs delete-institute">Delete</button> \
+                </div>',
+                {
+                    instituteId: institute.id
+                }
+            );
+
+            return node;
+        }
+
+        this.pullInstitutes = function() {
+            window.setInterval((function() {
+                this.getInstitutes();
+
+            }).bind(this), 1000 * 60);
+        }
+
+        this.instituteFormIsValid = function() {
+
+            const form = document.getElementById('instituteForm');
+            form.classList.remove('was-validated');
+
+            if (form.checkValidity() === true) {
+                const data = {};
+                data.abb = $('input[name="abb"]').val();
+                data.name = $('input[name="name"]').val();
+
+                return data;
+
+            } else {
+                form.classList.add('was-validated');
+            }
+        }
+
+        this.clearInstituteForm = function() {
+            $('input[name="abb"]').val(null);
+            $('input[name="name"]').val(null);
+        }
+
+        this.createInstitute = function(button) {
+            console.log('Create Institution');
+
+            const newInstituteData = this.instituteFormIsValid();
+
+            if (newInstituteData) {
+                $.ajax({
+                    url: this.apiUrl,
+                    method: 'POST',
+                    context: this,
+                    data: newInstituteData,
+                    success: function(res) {
+                        $('#instituteFormModal').modal('hide');
+                        this.clearInstituteForm();
+                        this.getInstitutes();
+                    },
+                    error: function(err) {
+                        if (err.hasOwnProperty('responseJSON')) {
+                            console.log(err.responseJSON);
+                            const errKey = Object.keys(err.responseJSON)[0];
+                            window.alert(sprintf('Cannot create institute: %s', err.responseJSON[errKey][0]));
+                        } else {
+                            window.alert('Cannot create institute.');
+                        }
+                    },
+                    complete: function() {
+                        button.reset();
+                    }
+                });
+            } else {
+                button.reset();
+            }
+        }
+
+        this.updateInstitute = function(button, instituteId) {
+            console.log('Update Institute');
+
+            const newInstituteData = this.instituteFormIsValid();
+            console.log(newInstituteData);
+
+            if (newInstituteData) {
+                console.log('Update institute: ', instituteId);
+                const url = sprintf('%s%s/', this.apiUrl, instituteId);
+
+                $.ajax({
+                    context: this,
+                    url: url,
+                    method: 'PATCH',
+                    data: newInstituteData,
+                    success: function(resp) {
+                        $('#instituteFormModal').modal('hide');
+                        this.clearInstituteForm();
+                        this.getInstitutes();
+                        $('#save-institute-form').attr('data-instituteid', null);
+                    },
+                    error: function(err) {
+                        if (err.hasOwnProperty('responseJSON')) {
+                            console.log(err.responseJSON);
+                            const errKey = Object.keys(err.responseJSON)[0];
+                            window.alert(sprintf('Cannot update institute: %s', err.responseJSON[errKey][0]));
+                        } else {
+                            window.alert('Cannot create institute.');
+                        }
+                    },
+                    complete: function() {
+                        button.reset();
+                    }
+                });
+
+            } else {
+                button.reset();
+            }
+        }
+
+        this.deleteInstitute = function(instituteId) {
+            console.log('Delete institute: ', instituteId);
+            const url = sprintf('%s%s', this.apiUrl, instituteId);
+
+            console.log(url);
+
+            $.ajax({
+                context: this,
+                url: url,
+                method: 'DELETE',
+                success: function(resp) {
+                    this.getInstitutes();
+                },
+                error: function(resp) {
+                    window.alert('Cannot remove institute');
+                }
+            });
+        }
+
+        this.setUpeditInstitute = function(button, instituteId) {
+            console.log('Edit Institute: ', instituteId);
+            const url = sprintf('%s%s', this.apiUrl, instituteId);
+            console.log(url);
+
+            $('#save-institute-form').attr('data-instituteid', instituteId);
+
+            $.getJSON(url, function(response) {
+                console.log(response);
+                button.reset();
+
+                $('#instituteFormModalLabel').text('Update Institute');
+                $('#instituteFormModal').modal('show');
+
+                $('input[name="abb"]').val(response.abb);
+                $('input[name="name"]').val(response.name);
+
+
+            });
+        }
+    }
+
+    function ButtonWrapper(buttonObj) {
+        this.originText = $(buttonObj).text();
+
+        this.loading = function() {
+            $(buttonObj).attr('disabled', true);
+            $(buttonObj).html('<span class="spinner-border spinner-border-sm"></span> Loading...');
+        }
+
+        this.reset = function() {
+            $(buttonObj).text(this.originText);
+            $(buttonObj).attr('disabled', false);
+        }
+    }
+
+    $(document).ready(function(event) {
+        const institutes = new Institutes();
+
+        institutes.setUpTableButtons();
+        institutes.getInstitutes();
+        // institutes.pullInstitutes();
+
+        $('#create-new-institute').on('click', function(event) {
+            // $('#save-institute-form').attr('data-instituteid', null);
+            // students.clearInstituteForm();
+            $('#instituteFormModalLabel').text('Create new institute');
+            $('#instituteFormModal').modal('show');
+        });
+
+        $('#save-institute-form').on('click', function(event) {
+            const saveButton = new ButtonWrapper(event.target);
+            saveButton.loading();
+
+            const instituteId = $(this).attr('data-instituteid');
+
+            if (instituteId) {
+                console.log('Updating');
+                institutes.updateInstitute(saveButton, instituteId);
+            } else {
+                console.log('Creating');
+                institutes.createInstitute(saveButton);
+            }
+        });
+    });
+</script>
+{% endblock %}

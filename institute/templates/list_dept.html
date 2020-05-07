@@ -1,0 +1,379 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<!-- Modal -->
+<div class="modal fade" id="departmentFormModal" tabindex="-1" role="dialog" aria-labelledby="departmentFormModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="departmentFormModalLabel">Modal title</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+  
+        <div class="modal-body">
+          <form role="form" id="departmentForm" novalidate>
+              <div class="row">
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label class="col-form-label" for="{{ form.dpt_abb.id_for_label }}">Abbreviation</label>
+                            {{ form.dpt_abb }}
+                        </div>
+                    </div>
+                    <div class="col-sm-9">
+                        <div class="form-group">
+                            <label class="col-form-label" for="{{ form.dpt_name.id_for_label }}">Department Name</label>
+                            {{ form.dpt_name }}
+                        </div>
+                    </div>
+              </div>
+          </form>
+        </div>
+  
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" id="save-department-form">Save changes</button>
+        </div>
+  
+      </div>
+    </div>
+</div>
+<!-- Modal -->
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h3></h3>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'list_inst' %}">Home</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'list_inst' %}">Institutes</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'list_inst' %}">Schools</a>
+            </li>
+            <li class="breadcrumb-item active">
+                <strong>Departments</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-2">
+
+    </div>
+</div>
+
+<div class="wrapper wrapper-content">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="row">
+              <div class="col-lg-12">
+                  <button type="button" class="btn btn-primary btn-xs" id="create-new-department">New Department</button>
+                  <p></p>
+              </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+      <div class="col-lg-9">
+          <div class="ibox">
+              <div class="ibox-content">
+                  <table class="footable table table-stripped toggle-arrow-tiny" data-page-size="15" id="departments-table">
+                      <thead>
+                          <tr>
+                              <th>ID</th>
+                              <th data-hide="phone">Department Name</th>
+                              <th data-hide="phone">Status</th>
+                              <th class="text-right">Action</th>
+                          </tr>
+                      </thead>
+                      <tbody id="dept-list"></tbody>
+  
+                      <tfoot>
+                      <tr>
+                          <td colspan="7">
+                              <ul class="pagination float-right"></ul>
+                          </td>
+                      </tr>
+                      </tfoot>
+                  </table>
+  
+              </div>
+          </div>
+      </div>
+  </div>
+    
+  </div>
+{% endblock %}
+
+{% block page_js %}
+<script type="text/javascript" src="{% static 'js/ajax-tools.js' %}"></script>
+<script type="text/javascript">
+
+    function Departments() {
+        this.apiUrl = '/api/inst/';
+        var newURL = window.location.pathname.split('/');
+        console.log(newURL[2]);
+        this.instId = newURL[2];
+        this.schId = newURL[4];
+        this.url = sprintf('%s%s%s%s%s', this.apiUrl, this.instId, '/sch/', this.schId, '/dept/');
+
+        this.setUpTableButtons = function() {
+            $(document).on('click', 'button.delete-department', (function(event) {
+                const departmentId = $(event.target).attr('data-departmentid');
+                this.deleteDepartment(departmentId);
+            }).bind(this));
+
+            $(document).on('click', 'button.edit-department', (function(event) {
+                const editButton = new ButtonWrapper(event.target);
+                editButton.loading();
+
+                const departmentId = $(event.target).attr('data-departmentid');
+                this.setUpeditDepartment(editButton, departmentId);
+            }).bind(this));
+        }
+
+        this.getDepartments = function() {
+            
+            console.log(this.url);
+
+            const tbodyCss = '#departments-table > tbody';
+            const self = this;
+
+            $(tbodyCss).empty();
+           
+            $.getJSON(this.url, function(response) {
+                console.log(response);
+                response.map(function(department) {
+                    $(tbodyCss).append(sprintf(
+                        '<tr> \
+                            <td>%(abb)s</td> \
+                            <td>%(name)s</td> \
+                            <td>%(status)s</td> \
+                            <td>%(actions)s</td> \
+                        </tr>',
+                        {
+                            abb: department.dpt_abb,
+                            name: self.getNameNode(department),
+                            status: '<span class="label label-primary">Paid</span>',
+                            actions: self.getActionsNode(department),
+                        }
+                    ));
+                });
+            }).fail(function(err) {
+                window.alert('Cannot get department'); 
+            });
+        }
+
+        this.getNameNode = function(department) {
+            return sprintf('<a href="%s/classes/">%s</a>', department.id, department.dpt_name);
+        }
+
+        this.getActionsNode = function(department) {
+            const node = sprintf('\
+                <div class="btn-group pull-right"> \
+                    <button data-departmentId="%(departmentId)s" class="btn-white btn btn-xs edit-department">Edit</button> \
+                    <button data-departmentId="%(departmentId)s" class="btn-white btn btn-xs delete-department">Delete</button> \
+                </div>',
+                {
+                    departmentId: department.id
+                }
+            );
+
+            return node;
+        }
+
+        this.pullDepartments = function() {
+            window.setInterval((function() {
+                this.getDepartments();
+
+            }).bind(this), 1000 * 60);
+        }
+
+        this.departmentFormIsValid = function() {
+
+            const form = document.getElementById('departmentForm');
+            form.classList.remove('was-validated');
+
+            if (form.checkValidity() === true) {
+                const data = {};
+                data.dpt_sch = this.schId;
+                data.dpt_abb = $('input[name="dpt_abb"]').val();
+                data.dpt_name = $('input[name="dpt_name"]').val();
+
+                console.log(data);
+
+                return data;
+
+            } else {
+                form.classList.add('was-validated');
+            }
+        }
+
+        this.clearDepartmentForm = function() {
+            $('input[name="dpt_abb"]').val(null);
+            $('input[name="dpt_name"]').val(null);
+        }
+
+        this.createDepartment = function(button) {
+            console.log('Create Department');
+
+            const newDepartmentData = this.departmentFormIsValid();
+
+            if (newDepartmentData) {
+                $.ajax({
+                    url: this.url,
+                    method: 'POST',
+                    context: this,
+                    data: newDepartmentData,
+                    success: function(res) {
+                        $('#departmentFormModal').modal('hide');
+                        this.clearDepartmentForm();
+                        this.getDepartments();
+                    },
+                    error: function(err) {
+                        if (err.hasOwnProperty('responseJSON')) {
+                            console.log(err.responseJSON);
+                            const errKey = Object.keys(err.responseJSON)[0];
+                            window.alert(sprintf('Cannot create Department: %s', err.responseJSON[errKey][0]));
+                        } else {
+                            window.alert('Cannot create Department.');
+                        }
+                    },
+                    complete: function() {
+                        button.reset();
+                    }
+                });
+            } else {
+                button.reset();
+            }
+        }
+
+        this.updateDepartment = function(button, departmentId) {
+            console.log('Update Department');
+
+            const newDepartmentData = this.departmentFormIsValid();
+            console.log(newDepartmentData);
+
+            if (newDepartmentData) {
+                console.log('Update Department: ', departmentId);
+                const surl = sprintf('%s%s/', this.url, departmentId);
+
+                $.ajax({
+                    context: this,
+                    url: surl,
+                    method: 'PUT',
+                    data: newDepartmentData,
+                    success: function(resp) {
+                        $('#departmentFormModal').modal('hide');
+                        this.clearDepartmentForm();
+                        this.getDepartments();
+                        $('#save-department-form').attr('data-departmentid', null);
+                    },
+                    error: function(err) {
+                        if (err.hasOwnProperty('responseJSON')) {
+                            console.log(err.responseJSON);
+                            const errKey = Object.keys(err.responseJSON)[0];
+                            window.alert(sprintf('Cannot update department: %s', err.responseJSON[errKey][0]));
+                        } else {
+                            window.alert('Cannot create department.');
+                        }
+                    },
+                    complete: function() {
+                        button.reset();
+                    }
+                });
+
+            } else {
+                button.reset();
+            }
+        }
+
+        this.deleteDepartment = function(departmentId) {
+            console.log('Delete department: ', departmentId);
+            const surl = sprintf('%s%s', this.url, departmentId);
+
+            console.log(surl);
+
+            $.ajax({
+                context: this,
+                url: surl,
+                method: 'DELETE',
+                success: function(resp) {
+                    this.getDepartments();
+                },
+                error: function(resp) {
+                    window.alert('Cannot remove department');
+                }
+            });
+        }
+
+        this.setUpeditDepartment = function(button, departmentId) {
+            console.log('Edit Department: ', departmentId);
+            const surl = sprintf('%s%s', this.url, departmentId);
+            console.log(surl);
+
+            $('#save-department-form').attr('data-departmentid', departmentId);
+
+            $.getJSON(surl, function(response) {
+                console.log(response);
+                button.reset();
+
+                $('#departmentFormModalLabel').text('Update Department');
+                $('#departmentFormModal').modal('show');
+
+                $('input[name="dpt_abb"]').val(response.dpt_abb);
+                $('input[name="dpt_name"]').val(response.dpt_name);
+
+
+            });
+        }
+    }
+
+    function ButtonWrapper(buttonObj) {
+        this.originText = $(buttonObj).text();
+
+        this.loading = function() {
+            $(buttonObj).attr('disabled', true);
+            $(buttonObj).html('<span class="spinner-border spinner-border-sm"></span> Loading...');
+        }
+
+        this.reset = function() {
+            $(buttonObj).text(this.originText);
+            $(buttonObj).attr('disabled', false);
+        }
+    }
+
+    $(document).ready(function(event) {
+        const departments = new Departments();
+
+        departments.setUpTableButtons();
+        departments.getDepartments();
+        departments.pullDepartments();
+
+        $('#create-new-department').on('click', function(event) {
+            // $('#save-institute-form').attr('data-instituteid', null);
+            // students.clearInstituteForm();
+            $('#departmentFormModalLabel').text('Create new Department');
+            $('#departmentFormModal').modal('show');
+        });
+
+        $('#save-department-form').on('click', function(event) {
+            const saveButton = new ButtonWrapper(event.target);
+            saveButton.loading();
+
+            const departmentId = $(this).attr('data-departmentid');
+
+            if (departmentId) {
+                console.log('Updating');
+                departments.updateDepartment(saveButton, departmentId);
+            } else {
+                console.log('Creating');
+                departments.createDepartment(saveButton);
+            }
+        });
+    });
+</script>
+{% endblock %}

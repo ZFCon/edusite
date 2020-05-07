@@ -1,0 +1,1066 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h3></h3>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'list_inst' %}">Home</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'list_inst' %}">Institutes</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'list_inst' %}">Schools</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'list_inst' %}">Departments</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'list_inst' %}">Classes</a>
+            </li>
+            <li class="breadcrumb-item active">
+                <strong>Courses</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-2">
+
+    </div>
+</div>
+
+<div class="wrapper wrapper-content">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox">
+                <div class="ibox-title">
+                    <h2 class="font-bold">EESM 100 Class</h2>
+                    <div class="ibox-tools">
+
+                        <div class="float-right social-action dropdown">
+                            <button data-toggle="dropdown" class="dropdown-toggle btn-white" aria-expanded="false">
+                                <i class="fa fa-angle-down"></i>
+                            </button>
+                            <ul class="dropdown-menu m-t-xs" x-placement="bottom-start" style="position: absolute; top: 24px; left: 0px; will-change: top, left;">
+                                <li><a class="dropdown-item" href="#">New Lesson</a></li>
+                                <li><a class="dropdown-item" href="#">New Assessment</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    
+                    <p>
+                        All clients need to be verified before you can send email and set a project.
+                    </p>
+                
+                    <div class="clients-list">
+                    <span class="float-right small text-muted">45 Students</span>
+                    <ul class="nav nav-tabs">
+                        <li><a class="nav-link active" data-toggle="tab" href="#tab-1"><i class="fa fa-user"></i> Students</a></li>
+                        <li><a class="nav-link" data-toggle="tab" href="#tab-2"><i class="fa fa-briefcase"></i> Lessons</a></li>
+                        <li><a class="nav-link" data-toggle="tab" href="#tab-3"><i class="fa fa-briefcase"></i> Assessments</a></li>
+                        <li><a class="nav-link" data-toggle="tab" href="#tab-4"><i class="fa fa-user"></i> Teachers</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div id="tab-1" class="tab-pane active">
+                            <div class="full-height-scroll">
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-hover" id="screcords-table">
+                                        <thead>
+                                            <tr>
+                                                <th></th>
+                                                <th>Name</th>
+                                                <th>CA1</th>
+                                                <th>CA2</th>
+                                                <th>MT</th>
+                                                <th>CA4</th>
+                                                <th>CA5</th>
+                                                <th>PR</th>
+                                                <th>FE</th>
+                                                <th>TS</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="class-screcord-list"> </tbody>
+                                       
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="tab-2" class="tab-pane">
+                            <div class="full-height-scroll">
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-hover" id="lessons-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Lesson</th>
+                                                <th></th>
+                                                <th></th>
+                                                <th></th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="class-lesson-list"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="tab-3" class="tab-pane active">
+                            <div class="full-height-scroll">
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-hover" id="assessments-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Type</th>
+                                                <th>Name</th>
+                                                <th>Duration</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="class-assessment-list"> </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="tab-4" class="tab-pane active">
+                            <div class="full-height-scroll">
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-hover" id="tcrecords-table">
+                                        <thead>
+                                            <tr>
+                                                <th></th>
+                                                <th>Name</th>
+                                                <th>LPer</th>
+                                                <th>OPer</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="class-teacher-list"></tbody>
+                                       
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+       
+    </div>
+</div>
+{% endblock %}
+
+{% block page_js %}
+<script type="text/javascript" src="{% static 'js/ajax-tools.js' %}"></script>
+<script type="text/javascript">
+
+    function SCRecords() {
+        this.apiUrl = '/api/inst/';
+        var newURL = window.location.pathname.split('/');
+        this.instId = newURL[2];
+        this.schId = newURL[4];
+        this.dptId = newURL[6];
+        this.dptclsId = newURL[8];
+        this.crseId = newURL[8];
+        this.srId = '/api/std/';
+        this.srUrl = '/api/student/1/course/1/record/';
+        this.url = sprintf('%s%s%s%s%s%s%s%s%s%s', this.apiUrl, this.instId, '/sch/', this.schId, '/dept/', this.dptId, '/dptcls/', this.dptclsId, '/crse/', this.crseId );
+        
+
+        this.setUpTableButtons = function() {
+            // Student Record
+            $(document).on('click', 'button.delete-screcord', (function(event) {
+                const screcordId = $(event.target).attr('data-screcordid');
+                this.deleteSCRecord(sCrecordId);
+            }).bind(this));
+
+            $(document).on('click', 'button.edit-screcord', (function(event) {
+                const editButton = new ButtonWrapper(event.target);
+                editButton.loading();
+
+                const screcordId = $(event.target).attr('data-screcordid');
+                this.setUpeditSRecord(editButton, screcordId);
+            }).bind(this));
+
+        }
+
+        this.getSCRecords = function() {
+            console.log(this.url);
+            const tbodyCss = '#screcords-table > tbody';
+            const self = this;
+            $(tbodyCss).empty();
+           
+            // Dependence chain of AJAX requests
+
+            $.getJSON(this.url, function(response) {
+                console.log(response);
+                response.screcord.map(function(screcord) {
+                    $(tbodyCss).append(sprintf(
+                        '<tr> \
+                            <td>%(name)s</td> \
+                            <td>%(ca1)s</td> \
+                            <td>%(ca2)s</td> \
+                            <td>%(mt)s</td> \
+                            <td>%(ca4)s</td> \
+                            <td>%(ca5)s</td> \
+                            <td>%(pr)s</td> \
+                            <td>%(fe)s</td> \
+                            <td>%(ts)s</td> \
+                        </tr>',
+                        {
+                            name: screcord.caone,
+                            ca1: screcord.caone,
+                            ca2: screcord.catwo,
+                            mt: screcord.midterm,
+                            ca4: screcord.cathree,
+                            ca5: screcord.cafour,
+                            pr: screcord.project,
+                            fe: screcord.exam,
+                            ts: screcord.total,
+                        }
+                    ));
+                });
+            }).fail(function(err) {
+                window.alert('Cannot get Student Record'); 
+            });
+
+        }
+
+        this.getNameNode = function(screcord) {
+            return sprintf('<a href="%s">%s</a>', screcord.id, screcord.astype);
+        }
+
+        this.getActionsNode = function(screcord) {
+            const node = sprintf('\
+                <div class="btn-group pull-right"> \
+                    <button data-screcordId="%(screcordId)s" class="btn-white btn btn-xs edit-screcord">Edit</button> \
+                    <button data-screcordId="%(screcordId)s" class="btn-white btn btn-xs delete-screcord">Delete</button> \
+                </div>',
+                {
+                    screcordId: screcord.id
+                }
+            );
+
+            return node;
+        }
+
+        this.pullSCRecords   = function() {
+            window.setInterval((function() {
+                this.getCourses();
+
+            }).bind(this), 1000 * 60);
+        }
+
+        this.screcordsFormIsValid = function() {
+
+            const form = document.getElementById('courseForm');
+            form.classList.remove('was-validated');
+
+            if (form.checkValidity() === true) {
+                const data = {};
+                data.ce_dptcls = this.dptclsId;
+                data.ce_abb = $('input[name="ce_abb"]').val();
+                data.ce_name = $('input[name="ce_name"]').val();
+
+                console.log(data);
+
+                return data;
+
+            } else {
+                form.classList.add('was-validated');
+            }
+        }
+
+        this.clearSCRecordForm = function() {
+            $('input[name="ce_abb"]').val(null);
+            $('input[name="ce_name"]').val(null);
+        }
+
+        this.createSCRecord = function(button) {
+            console.log('Create Class');
+
+            const newCourseData = this.courseFormIsValid();
+
+            if (newCourseData) {
+                $.ajax({
+                    url: this.url,
+                    method: 'POST',
+                    context: this,
+                    data: newCourseData,
+                    success: function(res) {
+                        $('#courseFormModal').modal('hide');
+                        this.clearCourseForm();
+                        this.getCourses();
+                    },
+                    error: function(err) {
+                        if (err.hasOwnProperty('responseJSON')) {
+                            console.log(err.responseJSON);
+                            const errKey = Object.keys(err.responseJSON)[0];
+                            window.alert(sprintf('Cannot create Course: %s', err.responseJSON[errKey][0]));
+                        } else {
+                            window.alert('Cannot Create Course.');
+                        }
+                    },
+                    complete: function() {
+                        button.reset();
+                    }
+                });
+            } else {
+                button.reset();
+            }
+        }
+
+        this.updateSCRecord = function(button, courseId) {
+            console.log('Update Course');
+
+            const newCourseData = this.courseFormIsValid();
+            console.log(newCourseData);
+
+            if (newCourseData) {
+                console.log('Update Course: ', courseId);
+                const surl = sprintf('%s%s/', this.url, courseId);
+
+                $.ajax({
+                    context: this,
+                    url: surl,
+                    method: 'PUT',
+                    data: newCourseData,
+                    success: function(resp) {
+                        $('#courseFormModal').modal('hide');
+                        this.clearCourseForm();
+                        this.getCourses();
+                        $('#save-course-form').attr('data-courseid', null);
+                    },
+                    error: function(err) {
+                        if (err.hasOwnProperty('responseJSON')) {
+                            console.log(err.responseJSON);
+                            const errKey = Object.keys(err.responseJSON)[0];
+                            window.alert(sprintf('Cannot update course: %s', err.responseJSON[errKey][0]));
+                        } else {
+                            window.alert('Cannot create course.');
+                        }
+                    },
+                    complete: function() {
+                        button.reset();
+                    }
+                });
+
+            } else {
+                button.reset();
+            }
+        }
+
+        this.deleteSCRecord = function(courseId) {
+            console.log('Delete Course: ', courseId);
+            const surl = sprintf('%s%s', this.url, courseId);
+
+            console.log(surl);
+
+            $.ajax({
+                context: this,
+                url: surl,
+                method: 'DELETE',
+                success: function(resp) {
+                    this.getCourses();
+                },
+                error: function(resp) {
+                    window.alert('Cannot Remove Course');
+                }
+            });
+        }
+
+        this.setUpeditSCRecord = function(button, courseId) {
+            console.log('Edit Course: ', courseId);
+            const surl = sprintf('%s%s', this.url, courseId);
+            console.log(surl);
+
+            $('#save-course-form').attr('data-courseid', courseId);
+
+            $.getJSON(surl, function(response) {
+                console.log(response);
+                button.reset();
+
+                $('#courseFormModalLabel').text('Update Course');
+                $('#courseFormModal').modal('show');
+
+                $('input[name="ce_abb"]').val(response.ce_abb);
+                $('input[name="ce_name"]').val(response.ce_name);
+
+
+            });
+        }
+    }
+
+    function TCRecords() {
+        this.apiUrl = '/api/inst/';
+        var newURL = window.location.pathname.split('/');
+        this.instId = newURL[2];
+        this.schId = newURL[4];
+        this.dptId = newURL[6];
+        this.dptclsId = newURL[8];
+        this.crseId = newURL[8];
+        this.dptclsId = newURL[8];
+        this.srId = '/api/tch/';
+        this.srUrl = '/api/student/1/course/';
+        this.url = sprintf('%s%s%s%s%s%s%s%s%s', this.apiUrl, this.instId, '/sch/', this.schId, '/dept/', this.dptId, '/dptcls/', this.dptclsId, '/crse/' );
+            
+
+        this.setUpTableButtons = function() {
+            // Teacher Record
+            $(document).on('click', 'button.delete-tcrecord', (function(event) {
+                const tcrecordId = $(event.target).attr('data-tcrecordid');
+                this.deleteSCRecord(tcrecordId);
+            }).bind(this));
+
+            $(document).on('click', 'button.edit-tcrecord', (function(event) {
+                const editButton = new ButtonWrapper(event.target);
+                editButton.loading();
+
+                const srecordId = $(event.target).attr('data-srecordid');
+                this.setUpeditSRecord(editButton, srecordId);
+            }).bind(this));
+
+        }
+
+        this.getTCRecords = function() {
+            // Dependence chain of AJAX requests
+            var getTeacherID = $.getJSON(this.url),
+                getTCRecords = getTeacherID.then(function(data) {
+                               console.log(data);
+                               return $.getJSON(this.srUrl, data.tc_crse_reg.teacher_id)
+                               });
+
+            getTCRecords.done(function(data) {
+                response.map(function(tcrecord) {
+                $(tbodyCss).append(sprintf(
+                        '<tr> \
+                            <td></td> \
+                            <td>%(name)s</td> \
+                            <td></td> \
+                            <td></td> \
+                            <td>%(actions)s</td> \
+                        </tr>',
+                        {
+                            name: self.getNameNode(tcrecord),
+                            actions: self.getActionsNode(tcrecord),
+                        }
+                    ));
+                });
+            }).fail(function(err) {
+                window.alert('Cannot get Teacher Record'); 
+            });
+        }
+
+        this.getNameNode = function(tcrecord) {
+            return sprintf('<a href="%s">%s</a>', tcrecord.id, tcrecord.astype);
+        }
+
+        this.getActionsNode = function(tcrecord) {
+            const node = sprintf('\
+                <div class="btn-group pull-right"> \
+                    <button data-tcrecordId="%(tcrecordId)s" class="btn-white btn btn-xs edit-tcrecord">Edit</button> \
+                    <button data-tcrecordId="%(tcrecordId)s" class="btn-white btn btn-xs delete-tcrecord">Delete</button> \
+                </div>',
+                {
+                    tcrecordId: tcrecord.id
+                }
+            );
+
+            return node;
+        }
+
+        this.pullTCRecords = function() {
+            window.setInterval((function() {
+                this.getCourses();
+
+            }).bind(this), 1000 * 60);
+        }
+
+    }
+
+    function Lessons() {
+        this.apiUrl = '/api/inst/';
+        var newURL = window.location.pathname.split('/');
+        this.instId = newURL[2];
+        this.schId = newURL[4];
+        this.dptId = newURL[6];
+        this.dptclsId = newURL[8];
+        this.crseId = newURL[8];
+        this.url = sprintf('%s%s%s%s%s%s%s%s%s%s%s', this.apiUrl, this.instId, '/sch/', this.schId, '/dept/', this.dptId, '/dptcls/', this.dptclsId, '/crse/', this.crseId, '/lsn/');
+
+        this.setUpTableButtons = function() {
+            // Lesson
+            $(document).on('click', 'button.delete-lesson', (function(event) {
+                const lessonId = $(event.target).attr('data-lessonid');
+                this.deleteLesson(lessonId);
+            }).bind(this));
+
+            $(document).on('click', 'button.edit-lesson', (function(event) {
+                const editButton = new ButtonWrapper(event.target);
+                editButton.loading();
+
+                const lessonId = $(event.target).attr('data-lessonid');
+                this.setUpeditLesson(editButton, lessonId);
+            }).bind(this));
+        }
+
+        this.getLessons = function() {
+            console.log(this.url);
+            const tbodyCss = '#lessons-table > tbody';
+            const self = this;
+
+            $(tbodyCss).empty();
+           
+            $.getJSON(this.url, function(response) {
+                console.log(response);
+                response.map(function(lesson) {
+                    $(tbodyCss).append(sprintf(
+                        '<tr> \
+                            <td>%(name)s</td> \
+                            <td>%(note)s</td> \
+                            <td>%(video)s</td> \
+                            <td>%(actions)s</td> \
+                        </tr>',
+                        {
+                            name: lesson.le_name,
+                            note: self.getLNoteNode(lesson),
+                            video: self.getLVideoNode(lesson),
+                            actions: self.getActionsNode(lesson),
+                        }
+                    ));
+                });
+            }).fail(function(err) {
+                window.alert('Cannot Get Lesson'); 
+            });
+        }
+
+        this.getLNoteNode = function(lesson) {
+            return sprintf('\
+                <div class="btn-group"> \
+                    <button data-lessonId="%(lnote)s" class="btn btn-white btn-xs">Read eNote</button> \
+                </div>',
+                {
+                    lnote: lesson.le_note
+                }
+            );
+        }
+
+        this.getLVideoNode = function(lesson) {
+            return sprintf('\
+                <div class="btn-group"> \
+                    <button data-lessonId="%(lvideo)s" class="btn btn-white btn-xs">Watch Video</button> \
+                </div>',
+                {
+                    lvideo: lesson.le_video
+                }
+            );
+        }
+
+        this.getActionsNode = function(lesson) {
+            const node = sprintf('\
+                <div class="btn-group pull-right"> \
+                    <button data-lessonId="%(lessonId)s" class="btn-white btn btn-xs edit-lesson">Edit</button> \
+                    <button data-lessonId="%(lessonId)s" class="btn-white btn btn-xs delete-lesson">Delete</button> \
+                </div>',
+                {
+                    lessonId: lesson.id
+                }
+            );
+
+            return node;
+        }
+
+        this.pullLessons = function() {
+            window.setInterval((function() {
+                this.getLessons();
+
+            }).bind(this), 1000 * 60);
+        }
+
+        this.lessonFormIsValid = function() {
+
+            const form = document.getElementById('lessonForm');
+            form.classList.remove('was-validated');
+
+            if (form.checkValidity() === true) {
+                const data = {};
+                data.course = this.crseId;
+                data.le_name = $('input[name="le_name"]').val();
+
+                console.log(data);
+
+                return data;
+
+            } else {
+                form.classList.add('was-validated');
+            }
+        }
+
+        this.clearLessonForm = function() {
+            $('input[name="le_name"]').val(null);
+        }
+
+        this.createLesson = function(button) {
+            console.log('Create Lesson');
+
+            const newLessonData = this.lessonFormIsValid();
+
+            if (newLessonData) {
+                $.ajax({
+                    url: this.url,
+                    method: 'POST',
+                    context: this,
+                    data: newLessonData,
+                    success: function(res) {
+                        $('#courseFormModal').modal('hide');
+                        this.clearLessonForm();
+                        this.getLessons();
+                    },
+                    error: function(err) {
+                        if (err.hasOwnProperty('responseJSON')) {
+                            console.log(err.responseJSON);
+                            const errKey = Object.keys(err.responseJSON)[0];
+                            window.alert(sprintf('Cannot create Lesson: %s', err.responseJSON[errKey][0]));
+                        } else {
+                            window.alert('Cannot Create Lesson.');
+                        }
+                    },
+                    complete: function() {
+                        button.reset();
+                    }
+                });
+            } else {
+                button.reset();
+            }
+        }
+
+        this.updateLesson = function(button, lessonId) {
+            console.log('Update Course');
+
+            const newLessonData = this.courseFormIsValid();
+            console.log(newLessonData);
+
+            if (newLessonData) {
+                console.log('Update Lesson: ', lessonId);
+                const surl = sprintf('%s%s/', this.url, lessonId);
+
+                $.ajax({
+                    context: this,
+                    url: surl,
+                    method: 'PUT',
+                    data: newLessonData,
+                    success: function(resp) {
+                        $('#lessonFormModal').modal('hide');
+                        this.clearLessonForm();
+                        this.getLessons();
+                        $('#save-lesson-form').attr('data-lessonid', null);
+                    },
+                    error: function(err) {
+                        if (err.hasOwnProperty('responseJSON')) {
+                            console.log(err.responseJSON);
+                            const errKey = Object.keys(err.responseJSON)[0];
+                            window.alert(sprintf('Cannot update lesson: %s', err.responseJSON[errKey][0]));
+                        } else {
+                            window.alert('Cannot create Lesson.');
+                        }
+                    },
+                    complete: function() {
+                        button.reset();
+                    }
+                });
+
+            } else {
+                button.reset();
+            }
+        }
+
+        this.deleteLesson = function(lessonId) {
+            console.log('Delete Lesson: ', lessonId);
+            const surl = sprintf('%s%s', this.url, lessonId);
+
+            console.log(surl);
+
+            $.ajax({
+                context: this,
+                url: surl,
+                method: 'DELETE',
+                success: function(resp) {
+                    this.getCLessons();
+                },
+                error: function(resp) {
+                    window.alert('Cannot Remove Lesson');
+                }
+            });
+        }
+
+        this.setUpeditLesson = function(button, lessonId) {
+            console.log('Edit Lesson: ', lessonId);
+            const surl = sprintf('%s%s', this.url, lessonId);
+            console.log(surl);
+
+            $('#save-lesson-form').attr('data-lessonid', lessonId);
+
+            $.getJSON(surl, function(response) {
+                console.log(response);
+                button.reset();
+
+                $('#lessonFormModalLabel').text('Update Lesson');
+                $('#lessonFormModal').modal('show');
+
+                $('input[name="le_name"]').val(response.le_name);
+
+
+            });
+        }
+    }
+    
+    function Assessments() {
+        this.apiUrl = '/api/inst/';
+        var newURL = window.location.pathname.split('/');
+        this.instId = newURL[2];
+        this.schId = newURL[4];
+        this.dptId = newURL[6];
+        this.dptclsId = newURL[8];
+        this.crseId = newURL[8];
+        this.url = sprintf('%s%s%s%s%s%s%s%s%s%s%s', this.apiUrl, this.instId, '/sch/', this.schId, '/dept/', this.dptId, '/dptcls/', this.dptclsId, '/crse/', this.crseId, '/ass/' );
+        
+
+        this.setUpTableButtons = function() {
+            // Assessment
+            $(document).on('click', 'button.delete-assessment', (function(event) {
+                const assessmentId = $(event.target).attr('data-assessmentid');
+                this.deleteAssessment(assessmentId);
+            }).bind(this));
+
+            $(document).on('click', 'button.edit-assessment', (function(event) {
+                const editButton = new ButtonWrapper(event.target);
+                editButton.loading();
+
+                const assessmentId = $(event.target).attr('data-assessmentid');
+                this.setUpeditAssessment(editButton, assessmentId);
+            }).bind(this));
+
+        }
+
+        this.getAssessments = function() {
+            console.log(this.url);
+            const tbodyCss = '#assessments-table > tbody';
+            const self = this;
+
+            $(tbodyCss).empty();
+           
+            $.getJSON(this.url, function(response) {
+                console.log(response);
+                response.map(function(assessment) {
+                    $(tbodyCss).append(sprintf(
+                        '<tr> \
+                            <td>%(astype)s</td> \
+                            <td>%(name)s</td> \
+                            <td></td> \
+                            <td>%(actions)s</td> \
+                        </tr>',
+                        {
+                            astype: assessment.as_type,
+                            name: self.getNameNode(assessment),
+                            actions: self.getActionsNode(assessment),
+                        }
+                    ));
+                });
+            }).fail(function(err) {
+                window.alert('Cannot get Assessments'); 
+            });
+        }
+
+        this.getNameNode = function(assessment) {
+            return sprintf('<a href="%s">%s</a>', assessment.id, assessment.as_name);
+        }
+
+        this.getActionsNode = function(assessment) {
+            const node = sprintf('\
+                <div class="btn-group pull-right"> \
+                    <button data-assessmentId="%(assessmentId)s" class="btn-white btn btn-xs edit-assessment">Edit</button> \
+                    <button data-assessmentId="%(assessmentId)s" class="btn-white btn btn-xs delete-assessment">Delete</button> \
+                </div>',
+                {
+                    assessmentId: assessment.id
+                }
+            );
+
+            return node;
+        }
+
+        this.pullAssessments = function() {
+            window.setInterval((function() {
+                this.getAssessments();
+
+            }).bind(this), 1000 * 60);
+        }
+
+        this.courseFormIsValid = function() {
+
+            const form = document.getElementById('courseForm');
+            form.classList.remove('was-validated');
+
+            if (form.checkValidity() === true) {
+                const data = {};
+                data.ce_dptcls = this.dptclsId;
+                data.ce_abb = $('input[name="ce_abb"]').val();
+                data.ce_name = $('input[name="ce_name"]').val();
+
+                console.log(data);
+
+                return data;
+
+            } else {
+                form.classList.add('was-validated');
+            }
+        }
+
+        this.clearAssessmentForm = function() {
+            $('input[name="ce_abb"]').val(null);
+            $('input[name="ce_name"]').val(null);
+        }
+
+        this.createAssessment = function(button) {
+            console.log('Create Class');
+
+            const newAssessmentData = this.courseFormIsValid();
+
+            if (newCourseData) {
+                $.ajax({
+                    url: this.url,
+                    method: 'POST',
+                    context: this,
+                    data: newCourseData,
+                    success: function(res) {
+                        $('#courseFormModal').modal('hide');
+                        this.clearCourseForm();
+                        this.getCourses();
+                    },
+                    error: function(err) {
+                        if (err.hasOwnProperty('responseJSON')) {
+                            console.log(err.responseJSON);
+                            const errKey = Object.keys(err.responseJSON)[0];
+                            window.alert(sprintf('Cannot create Course: %s', err.responseJSON[errKey][0]));
+                        } else {
+                            window.alert('Cannot Create Course.');
+                        }
+                    },
+                    complete: function() {
+                        button.reset();
+                    }
+                });
+            } else {
+                button.reset();
+            }
+        }
+
+        this.updateAssessment = function(button, courseId) {
+            console.log('Update Course');
+
+            const newAssessmentData = this.courseFormIsValid();
+            console.log(newAssessmentData);
+
+            if (newCourseData) {
+                console.log('Update Course: ', courseId);
+                const surl = sprintf('%s%s/', this.url, courseId);
+
+                $.ajax({
+                    context: this,
+                    url: surl,
+                    method: 'PUT',
+                    data: newCourseData,
+                    success: function(resp) {
+                        $('#courseFormModal').modal('hide');
+                        this.clearCourseForm();
+                        this.getCourses();
+                        $('#save-course-form').attr('data-courseid', null);
+                    },
+                    error: function(err) {
+                        if (err.hasOwnProperty('responseJSON')) {
+                            console.log(err.responseJSON);
+                            const errKey = Object.keys(err.responseJSON)[0];
+                            window.alert(sprintf('Cannot update course: %s', err.responseJSON[errKey][0]));
+                        } else {
+                            window.alert('Cannot create course.');
+                        }
+                    },
+                    complete: function() {
+                        button.reset();
+                    }
+                });
+
+            } else {
+                button.reset();
+            }
+        }
+
+        this.deleteAssessment = function(courseId) {
+            console.log('Delete Course: ', courseId);
+            const surl = sprintf('%s%s', this.url, courseId);
+
+            console.log(surl);
+
+            $.ajax({
+                context: this,
+                url: surl,
+                method: 'DELETE',
+                success: function(resp) {
+                    this.getCourses();
+                },
+                error: function(resp) {
+                    window.alert('Cannot Remove Course');
+                }
+            });
+        }
+
+        this.setUpeditAssessment = function(button, courseId) {
+            console.log('Edit Course: ', courseId);
+            const surl = sprintf('%s%s', this.url, courseId);
+            console.log(surl);
+
+            $('#save-course-form').attr('data-courseid', courseId);
+
+            $.getJSON(surl, function(response) {
+                console.log(response);
+                button.reset();
+
+                $('#courseFormModalLabel').text('Update Course');
+                $('#courseFormModal').modal('show');
+
+                $('input[name="ce_abb"]').val(response.ce_abb);
+                $('input[name="ce_name"]').val(response.ce_name);
+
+
+            });
+        }
+    }
+        
+    function ButtonWrapper(buttonObj) {
+        this.originText = $(buttonObj).text();
+
+        this.loading = function() {
+            $(buttonObj).attr('disabled', true);
+            $(buttonObj).html('<span class="spinner-border spinner-border-sm"></span> Loading...');
+        }
+
+        this.reset = function() {
+            $(buttonObj).text(this.originText);
+            $(buttonObj).attr('disabled', false);
+        }
+    }
+
+    $(document).ready(function(event) {
+
+        const screcords = new SCRecords();
+        const tcrecords = new TCRecords();
+        const lessons = new Lessons();
+        const assessments = new Assessments();
+
+        // courses.setUpTableButtons();
+
+        screcords.getSCRecords();
+        tcrecords.getTCRecords();
+        lessons.getLessons();
+        assessments.getAssessments();
+        // courses.pullCourses();
+
+        // SCRecords
+        $('#create-new-screcord').on('click', function(event) {
+            // $('#save-institute-form').attr('data-instituteid', null);
+            // students.clearInstituteForm();
+            $('#screcordFormModalLabel').text('Create New Student Record');
+            $('#screcordFormModal').modal('show');
+        });
+
+        $('#save-screcord-form').on('click', function(event) {
+            const saveButton = new ButtonWrapper(event.target);
+            saveButton.loading();
+
+            const screcordId = $(this).attr('data-screcordid');
+
+            if (screcordId) {
+                console.log('Updating');
+                screcords.updateSCRecord(saveButton, screcordId);
+            } else {
+                console.log('Creating');
+                screcords.createSCRecord(saveButton);
+            }
+        });
+
+        // TCRecords
+        $('#create-new-tcrecord').on('click', function(event) {
+            // $('#save-institute-form').attr('data-instituteid', null);
+            // students.clearInstituteForm();
+            $('#tcrecordFormModalLabel').text('Create New Teacher Record');
+            $('#tcrecordFormModal').modal('show');
+        });
+
+        $('#save-tcrecord-form').on('click', function(event) {
+            const saveButton = new ButtonWrapper(event.target);
+            saveButton.loading();
+
+            const tcrecordId = $(this).attr('data-tcrecordid');
+
+            if (courseId) {
+                console.log('Updating');
+                tcrecords.updateTCRecord(saveButton, tcrecordId);
+            } else {
+                console.log('Creating');
+                tcrecords.createTCRecord(saveButton);
+            }
+        });
+
+        // Lessons
+        $('#create-new-lesson').on('click', function(event) {
+            // $('#save-institute-form').attr('data-instituteid', null);
+            // students.clearInstituteForm();
+            $('#lessonFormModalLabel').text('Create New Lesson');
+            $('#lessonFormModal').modal('show');
+        });
+
+        $('#save-lesson-form').on('click', function(event) {
+            const saveButton = new ButtonWrapper(event.target);
+            saveButton.loading();
+
+            const lessonId = $(this).attr('data-lessonid');
+
+            if (lessonId) {
+                console.log('Updating');
+                lessons.updateLesson(saveButton, lessonId);
+            } else {
+                console.log('Creating');
+                lessons.createLesson(saveButton);
+            }
+        });
+
+        // Assessments
+        $('#create-new-assessment').on('click', function(event) {
+            // $('#save-institute-form').attr('data-instituteid', null);
+            // students.clearInstituteForm();
+            $('#assessmentFormModalLabel').text('Create New Assessment');
+            $('#assessmentFormModal').modal('show');
+        });
+
+        $('#save-assessment-form').on('click', function(event) {
+            const saveButton = new ButtonWrapper(event.target);
+            saveButton.loading();
+
+            const assessmentId = $(this).attr('data-assessmentid');
+
+            if (assessmentId) {
+                console.log('Updating');
+                assessments.updateAssessment(saveButton, assessmentId);
+            } else {
+                console.log('Creating');
+                assessments.createAssessment(saveButton);
+            }
+        });
+
+
+    });
+</script>
+{% endblock %}

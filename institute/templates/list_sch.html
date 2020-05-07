@@ -1,0 +1,378 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<!-- Modal -->
+<div class="modal fade" id="schoolFormModal" tabindex="-1" role="dialog" aria-labelledby="schoolFormModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="schoolFormModalLabel">Modal title</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+  
+        <div class="modal-body">
+          <form role="form" id="schoolForm" novalidate>
+              <div class="row">
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label class="col-form-label" for="{{ form.sch_abb.id_for_label }}">Abbreviation</label>
+                            {{ form.sch_abb }}
+                        </div>
+                    </div>
+                    <div class="col-sm-9">
+                        <div class="form-group">
+                            <label class="col-form-label" for="{{ form.sch_name.id_for_label }}">School Name</label>
+                            {{ form.sch_name }}
+                        </div>
+                    </div>
+              </div>
+          </form>
+        </div>
+  
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" id="save-school-form">Save changes</button>
+        </div>
+  
+      </div>
+    </div>
+</div>
+<!-- Modal -->
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h3></h3>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'list_inst' %}">Home</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'list_inst' %}">Institutes</a>
+            </li>
+            <li class="breadcrumb-item active">
+                <strong>Schools</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-2">
+
+    </div>
+</div>
+
+<div class="wrapper wrapper-content">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="row">
+              <div class="col-lg-12">
+                  <button type="button" class="btn btn-primary btn-xs" id="create-new-school">New School</button>
+                  <p></p>
+              </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+      <div class="col-lg-9">
+          <div class="ibox">
+              <div class="ibox-content">
+                  <table class="footable table table-stripped toggle-arrow-tiny" data-page-size="15" id="schools-table">
+                      <thead>
+                          <tr>
+                              <th>ID</th>
+                              <th data-hide="phone">School Name</th>
+                              <th data-hide="phone">Status</th>
+                              <th class="text-right">Action</th>
+                          </tr>
+                      </thead>
+                      <tbody id="inst-list"></tbody>
+  
+                      <tfoot>
+                      <tr>
+                          <td colspan="7">
+                              <ul class="pagination float-right"></ul>
+                          </td>
+                      </tr>
+                      </tfoot>
+                  </table>
+  
+              </div>
+          </div>
+      </div>
+  </div>
+    
+  </div>
+{% endblock %}
+
+{% block page_js %}
+<script type="text/javascript" src="{% static 'js/ajax-tools.js' %}"></script>
+<script type="text/javascript">
+
+    function Schools() {
+        this.apiUrl = '/api/inst/';
+        var newURL = window.location.pathname.split('/');
+        console.log(newURL[2]);
+        this.instId = newURL[2];
+        this.url = sprintf('%s%s%s', this.apiUrl, this.instId, '/sch/');
+
+
+        this.setUpTableButtons = function() {
+            $(document).on('click', 'button.delete-school', (function(event) {
+                const schoolId = $(event.target).attr('data-schoolid');
+                this.deleteSchool(schoolId);
+            }).bind(this));
+
+            $(document).on('click', 'button.edit-school', (function(event) {
+                const editButton = new ButtonWrapper(event.target);
+                editButton.loading();
+
+                const schoolId = $(event.target).attr('data-schoolid');
+                this.setUpeditSchool(editButton, schoolId);
+            }).bind(this));
+        }
+
+        
+
+        this.getSchools = function() {
+            
+            console.log(this.url);
+
+            const tbodyCss = '#schools-table > tbody';
+            const self = this;
+
+            $(tbodyCss).empty();
+           
+            $.getJSON(this.url, function(response) {
+                console.log(response);
+                response.map(function(school) {
+                    $(tbodyCss).append(sprintf(
+                        '<tr> \
+                            <td>%(abb)s</td> \
+                            <td>%(name)s</td> \
+                            <td>%(status)s</td> \
+                            <td>%(actions)s</td> \
+                        </tr>',
+                        {
+                            abb: school.sch_abb,
+                            name: self.getNameNode(school),
+                            status: '<span class="label label-primary">Paid</span>',
+                            actions: self.getActionsNode(school),
+                        }
+                    ));
+                });
+            }).fail(function(err) {
+                window.alert('Cannot get schools'); 
+            });
+        }
+
+        this.getNameNode = function(school) {
+            return sprintf('<a href="%s/departments/">%s</a>', school.id, school.sch_name);
+        }
+
+        this.getActionsNode = function(school) {
+            const node = sprintf('\
+                <div class="btn-group pull-right"> \
+                    <button data-schoolId="%(schoolId)s" class="btn-white btn btn-xs edit-school">Edit</button> \
+                    <button data-schoolId="%(schoolId)s" class="btn-white btn btn-xs delete-school">Delete</button> \
+                </div>',
+                {
+                    schoolId: school.id
+                }
+            );
+
+            return node;
+        }
+
+        this.pullSchools = function() {
+            window.setInterval((function() {
+                this.getInstitutes();
+
+            }).bind(this), 1000 * 60);
+        }
+
+        this.schoolFormIsValid = function() {
+
+            const form = document.getElementById('schoolForm');
+            form.classList.remove('was-validated');
+
+            if (form.checkValidity() === true) {
+                const data = {};
+                data.sch_inst = this.instId;
+                data.sch_abb = $('input[name="sch_abb"]').val();
+                data.sch_name = $('input[name="sch_name"]').val();
+
+                console.log(data);
+
+                return data;
+
+            } else {
+                form.classList.add('was-validated'); 
+            }
+        }
+
+        this.clearSchoolForm = function() {
+            $('input[name="sch_abb"]').val(null);
+            $('input[name="sch_name"]').val(null);
+        }
+
+        this.createSchool = function(button) {
+            console.log('Create School');
+
+            const newSchoolData = this.schoolFormIsValid();
+
+            if (newSchoolData) {
+                $.ajax({
+                    url: this.url,
+                    method: 'POST',
+                    context: this,
+                    data: newSchoolData,
+                    success: function(res) {
+                        $('#schoolFormModal').modal('hide');
+                        this.clearSchoolForm();
+                        this.getSchools();
+                    },
+                    error: function(err) {
+                        if (err.hasOwnProperty('responseJSON')) {
+                            console.log(err.responseJSON);
+                            const errKey = Object.keys(err.responseJSON)[0];
+                            window.alert(sprintf('Cannot create school: %s', err.responseJSON[errKey][0]));
+                        } else {
+                            window.alert('Cannot create institute.');
+                        }
+                    },
+                    complete: function() {
+                        button.reset();
+                    }
+                });
+            } else {
+                button.reset();
+            }
+        }
+
+        this.updateSchool = function(button, schoolId) {
+            console.log('Update Institute');
+
+            const newSchoolData = this.schoolFormIsValid();
+            console.log(newSchoolData);
+
+            if (newSchoolData) {
+                console.log('Update School: ', schoolId);
+                const surl = sprintf('%s%s/', this.url, schoolId);
+
+                $.ajax({
+                    context: this,
+                    url: surl,
+                    method: 'PUT',
+                    data: newSchoolData,
+                    success: function(resp) {
+                        $('#schoolFormModal').modal('hide');
+                        this.clearSchoolForm();
+                        this.getSchools();
+                        $('#save-school-form').attr('data-schoolid', null);
+                    },
+                    error: function(err) {
+                        if (err.hasOwnProperty('responseJSON')) {
+                            console.log(err.responseJSON);
+                            const errKey = Object.keys(err.responseJSON)[0];
+                            window.alert(sprintf('Cannot update school: %s', err.responseJSON[errKey][0]));
+                        } else {
+                            window.alert('Cannot create school.');
+                        }
+                    },
+                    complete: function() {
+                        button.reset();
+                    }
+                });
+
+            } else {
+                button.reset();
+            }
+        }
+
+        this.deleteSchool = function(schoolId) {
+            console.log('Delete school: ', schoolId);
+            const surl = sprintf('%s%s', this.url, schoolId);
+
+            console.log(surl);
+
+            $.ajax({
+                context: this,
+                url: surl,
+                method: 'DELETE',
+                success: function(resp) {
+                    this.getSchools();
+                },
+                error: function(resp) {
+                    window.alert('Cannot remove school');
+                }
+            });
+        }
+
+        this.setUpeditSchool = function(button, schoolId) {
+            console.log('Edit School: ', schoolId);
+            const surl = sprintf('%s%s', this.url, schoolId);
+            console.log(surl);
+
+            $('#save-school-form').attr('data-schoolid', schoolId);
+
+            $.getJSON(surl, function(response) {
+                console.log(response);
+                button.reset();
+
+                $('#schoolFormModalLabel').text('Update School');
+                $('#schoolFormModal').modal('show');
+
+                $('input[name="sch_abb"]').val(response.sch_abb);
+                $('input[name="sch_name"]').val(response.sch_name);
+
+
+            });
+        }
+    }
+
+    function ButtonWrapper(buttonObj) {
+        this.originText = $(buttonObj).text();
+
+        this.loading = function() {
+            $(buttonObj).attr('disabled', true);
+            $(buttonObj).html('<span class="spinner-border spinner-border-sm"></span> Loading...');
+        }
+
+        this.reset = function() {
+            $(buttonObj).text(this.originText);
+            $(buttonObj).attr('disabled', false);
+        }
+    }
+
+    $(document).ready(function(event) {
+        const schools = new Schools();
+
+        schools.setUpTableButtons();
+        schools.getSchools();
+        // institutes.pullInstitutes();
+
+        $('#create-new-school').on('click', function(event) {
+            // $('#save-institute-form').attr('data-instituteid', null);
+            // students.clearInstituteForm();
+            $('#schoolFormModalLabel').text('Create new School');
+            $('#schoolFormModal').modal('show');
+        });
+
+        $('#save-school-form').on('click', function(event) {
+            const saveButton = new ButtonWrapper(event.target);
+            saveButton.loading();
+
+            const schoolId = $(this).attr('data-schoolid');
+
+            if (schoolId) {
+                console.log('Updating');
+                schools.updateSchool(saveButton, schoolId);
+            } else {
+                console.log('Creating');
+                schools.createSchool(saveButton);
+            }
+        });
+    });
+</script>
+{% endblock %}

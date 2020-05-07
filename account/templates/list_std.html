@@ -1,0 +1,688 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block navbar %}
+<nav class="navbar-default navbar-static-side" role="navigation">
+    <div class="sidebar-collapse">
+        <ul class="nav metismenu" id="side-menu">
+            <li class="nav-header">
+                {% if request.user.is_authenticated %}
+                <div class="dropdown profile-element">
+                    <a data-toggle="dropdown" class="dropdown-toggle" href="#">
+                        <span class="block m-t-xs font-bold">{{ request.user.username }}</span>
+                        <span class="text-muted text-xs block">menu <b class="caret"></b></span>
+                    </a>
+                    <ul class="dropdown-menu animated fadeInRight m-t-xs">
+                        <li><a class="dropdown-item" href="{% url 'logout' %}">My account</a></li>
+                        <li><a class="dropdown-item" href="{% url 'logout' %}">Change Password</a></li>
+                        <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
+                    </ul>
+                </div>
+                {% else %}
+                <form class="form-inline ml-auto">
+                    <a href="{% url 'login' %}" class="btn btn-outline-secondary">Log in</a>
+                    <a href="{% url 'register' %}" class="btn btn-primary ml-2">Sign up</a>
+                  </form>
+                {% endif %}
+                <div class="logo-element">
+                    IN+
+                </div>
+            </li>
+            <li>
+                <a href="{% url 'list_inst' %}"><i class="fa fa-th-large"></i> <span class="nav-label">Institutions</span></a>
+            </li>
+            <li class="active"> 
+                <a href="{% url 'list_std' %}"><i class="fa fa-diamond"></i> <span class="nav-label">Students</span></a>
+                <ul class="nav nav-second-level" id="institutes"></ul> 
+            </li>
+            <li>
+                <a href="#"><i class="fa fa-th-large"></i> <span class="nav-label">Teachers</span></a>
+            </li>
+            <li>
+                <a href="#"><i class="fa fa-th-large"></i> <span class="nav-label">Assessments</span></a>
+            </li>
+            <li>
+                <a href="#"><i class="fa fa-th-large"></i> <span class="nav-label">Books</span></a>
+            </li>
+        </ul>
+
+    </div>
+</nav>
+{% endblock %}
+
+
+
+
+
+{% block content %} 
+
+<!-- Modal -->
+<div class="modal fade" id="studentFormModal" tabindex="-1" role="dialog" aria-labelledby="studentFormModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="studentFormModalLabel">Modal title</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <form role="form" id="studentForm" data-schools-url="{% url 'ajax_load_schools' %}"  data-depts-url="{% url 'ajax_load_depts' %}" data-deptcls-url="{% url 'ajax_load_deptcls' %}" novalidate>
+            <div class="row">
+                <div class="col-sm-2">
+                    <div class="form-group">
+                        <label class="col-form-label" for="{{ form.std_abbr.id_for_label }}">Student ID</label>
+                        <input type="text" name="std_id" class="form-control" id="std-id" required="" placeholder="ID" maxlength="20">
+                    </div>
+                </div>
+                  <div class="col-sm-5">
+                      <div class="form-group">
+                          <label class="col-form-label" for="{{ form.std_fname.id_for_label }}">First Name</label>
+                          {{ form.first_name }}
+                      </div>
+                  </div>
+                  <div class="col-sm-5">
+                      <div class="form-group">
+                          <label class="col-form-label" for="{{ form.std_lname.id_for_label }}">Last Name</label>
+                          {{ form.last_name }}
+                      </div>
+                  </div>
+            </div>
+
+            <div class="row">
+                  
+                  <div class="col-sm-4">
+                      <div class="form-group">
+                          <label class="col-form-label" for="{{ form.std_sch.id_for_label }}">School</label>
+                          {% for school in schools %}
+                          <option value="{{ school.sch_id }}">{{ school.sch_name }}</option>
+                          {% endfor %}
+                          {{ form.school }}
+                      </div>
+                  </div>
+                  <div class="col-sm-4">
+                      <div class="form-group">
+                          <label class="col-form-label" for="{{ form.std_dept.id_for_label }}">Department</label>
+                         {{ form.department }}
+                      </div>
+                  </div>
+                  <div class="col-sm-4">
+                    <div class="form-group">
+                        <label class="col-form-label" for="{{ form.std_dptcls.id_for_label }}">Department Class</label>
+                        {{ form.dptclass }}
+                    </div>
+                </div>
+            </div>
+
+                     
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="save-student-form">Save changes</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="row wrapper border-bottom white-bg page-heading">
+  <div class="col-lg-10">
+      <h3></h3>
+      <ol class="breadcrumb">
+          <li class="breadcrumb-item">
+              <a href="#">Home</a>
+          </li>
+          <li class="breadcrumb-item active">
+              <strong>Students</strong>
+          </li>
+      </ol>
+  </div>
+</div>
+<div class="wrapper wrapper-content">
+  <div class="row">
+      <div class="col-lg-12">
+          
+      </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-2">
+        <div class="ibox ">
+            <div class="ibox-content">
+                <div class="file-manager">
+
+                    <h5>Schools</h5>
+                    <ul class="category-list" id="schools" style="padding: 0"></ul>
+
+                    <h5>Departments</h5>
+                    <ul class="category-list" id="departments" style="padding: 0"></ul>
+
+                    <h5>Classes</h5>
+                    <ul class="category-list" id="clss" style="padding: 0"></ul>
+
+                    <h5>Courses</h5>
+                    <ul class="category-list" id="crse" style="padding: 0"></ul>
+
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-10">
+        <div class="ibox">
+            <div class="ibox-content">
+                <div class="row">
+                    <div class="col-sm-9">
+                        
+                    </div>
+                    <div class="col-sm-3">
+                        
+                    </div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-striped" id="unregstudents">
+                        <thead>
+                        <tr>
+
+                            <th></th>
+                            <th>ID </th>
+                            <th>Student Name </th>
+                            <th>CGPA</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    
+</div>
+  
+</div>
+  
+{% endblock %}
+
+{% block page_js %}
+<script type="text/javascript" src="{% static 'js/ajax-tools.js' %}"></script>
+<script type="text/javascript">
+
+    function StudentTab() {
+
+        this.setUpListButtons = function() {
+            $(document).on('click', 'a.institute-list', (function(event) {
+                const instituteId = $(event.target).attr('data-instituteid');
+                console.log(instituteId);
+                this.getSchools(instituteId);
+            }).bind(this));
+
+            $(document).on('click', 'a.school-list', (function(event) {
+                const instituteId = $(event.target).attr('data-instituteid');
+                const schoolId = $(event.target).attr('data-schoolid');
+                console.log(schoolId);
+                this.getDepartments(instituteId, schoolId);
+            }).bind(this));
+
+            $(document).on('click', 'a.department-list', (function(event) {
+                const instituteId = $(event.target).attr('data-instituteid');
+                const schoolId = $(event.target).attr('data-schoolid');
+                const departmentId = $(event.target).attr('data-departmentid');
+                this.getClasses(instituteId, schoolId, departmentId);
+            }).bind(this));
+
+            $(document).on('click', 'a.dptclass-list', (function(event) {
+                const instituteId = $(event.target).attr('data-instituteid');
+                const schoolId = $(event.target).attr('data-schoolid');
+                const departmentId = $(event.target).attr('data-departmentid');
+                const dptclassId = $(event.target).attr('data-dptclassid');
+                this.getStdByClass(instituteId, schoolId, departmentId, dptclassId);
+                this.getCourses(instituteId, schoolId, departmentId, dptclassId);
+            }).bind(this));
+
+            $(document).on('click', 'button.delete-student', (function(event) {
+                const studentId = $(event.target).attr('data-studentid');
+                this.deleteStudent(studentId);
+            }).bind(this));
+
+            $(document).on('click', 'button.edit-student', (function(event) {
+                const editButton = new ButtonWrapper(event.target);
+                editButton.loading();
+
+                const studentId = $(event.target).attr('data-studentid');
+                this.setUpeditStudent(editButton, studentId);
+            }).bind(this));
+        }
+
+        this.getInstitutes = function() {
+            const self = this;
+            url = '/api/inst/';
+           
+            $.getJSON(url, function(response) {
+                console.log(response);
+                response.map(function(institute) {
+                    $("#institutes").append(sprintf('\
+                        <li><a href="#" class="institute-list" data-instituteid="%(instituteId)s">%(instituteAbb)s</a></li>' ,
+                        {
+                            instituteId: institute.id,
+                            instituteAbb: institute.abb,
+                        }
+                    ));
+                });
+            }).fail(function(err) {
+                window.alert('Cannot get Institutes'); 
+            });
+        }
+
+        this.getSchools = function(instId) {
+            const self = this;
+            this.instituteId = instId
+            url = sprintf('%s%s%s', '/api/inst/', instId, '/sch/');
+           
+            $.getJSON(url, function(response) {
+                console.log(response);
+                $("#schools").empty();
+                $("#departments").empty();
+                $("#clss").empty();
+                response.map(function(school) {
+                    $("#schools").append(sprintf('\
+                        <li><a href="#" class="school-list" data-instituteid="%(instituteId)s" data-schoolid="%(schoolId)s"><i class="fa fa-circle text-warning"></i>%(schoolAbb)s</a></li>' ,
+                        {
+                            instituteId: instId,
+                            schoolId: school.id,
+                            schoolAbb: school.sch_abb,
+                        }
+                    ));
+                });
+            }).fail(function(err) {
+                window.alert('Cannot get Schools'); 
+            });
+        }
+
+        this.getDepartments = function(instId, schId) {
+            const self = this;
+            this.instituteId = instId
+            this.schoolId = schId
+            url = sprintf('%s%s%s%s%s', '/api/inst/', instId, '/sch/', schId, '/dept/');
+           
+            $.getJSON(url, function(response) {
+                $("#departments").empty();
+                $("#clss").empty();
+                $("#crse").empty();
+                response.map(function(department) {
+                    $("#departments").append(sprintf('\
+                        <li><a href="#" class="department-list" data-instituteid="%(instituteId)s" data-schoolid="%(schoolId)s" data-departmentid="%(departmentId)s"><i class="fa fa-circle text-navy"></i>%(departmentAbb)s</a></li>' ,
+                        {
+                            instituteId: instId,
+                            schoolId: schId,
+                            departmentId: department.id,
+                            departmentAbb: department.dpt_abb,
+                        }
+                    ));
+                });
+            }).fail(function(err) {
+                window.alert('Cannot get schools'); 
+            });
+        }
+
+        this.getClasses = function(instId, schId, deptId) {
+            const self = this;
+            this.instituteId = instId
+            this.schoolId = schId
+            this.departmentId = deptId
+            url = sprintf('%s%s%s%s%s%s%s', '/api/inst/', instId, '/sch/', schId, '/dept/', deptId, '/dptcls/');
+            console.log(url);
+           
+            $.getJSON(url, function(response) {
+                $("#clss").empty();
+                $("#crse").empty();
+                response.map(function(clss) {
+                    $("#clss").append(sprintf('\
+                        <li><a href="#" class="dptclass-list" data-instituteid="%(instituteId)s" data-schoolid="%(schoolId)s" data-departmentid="%(departmentId)s" data-dptclassid="%(dptclassId)s"><i class="fa fa-circle text-primary"></i> %(dptclassAbb)s</a></li>' ,
+                        {
+                            instituteId: instId,
+                            schoolId: schId,
+                            departmentId: deptId,
+                            dptclassId: clss.id,
+                            dptclassAbb: clss.dcls_abb,
+                        }
+                    ));
+                });
+            }).fail(function(err) {
+                window.alert('Cannot get Classes'); 
+            });
+        }
+
+        this.getCourses = function(instId, schId, deptId, dptclsId) {
+            const self = this;
+            this.instituteId = instId
+            this.schoolId = schId
+            this.departmentId = deptId
+            this.departmentId = dptclsId
+
+            url = sprintf('%s%s%s%s%s%s%s%s%s', '/api/inst/', instId, '/sch/', schId, '/dept/', deptId, '/dptcls/', dptclsId, '/crse/');
+            console.log(url);
+           
+            $.getJSON(url, function(response) {
+                $("#crse").empty();
+                response.map(function(crse) {
+                    $("#crse").append(sprintf('\
+                        <li><a href="#" class="dptclass-list" data-instituteid="%(instituteId)s" data-schoolid="%(schoolId)s" data-departmentid="%(departmentId)s" data-dptclassid="%(dptclassId)s"><i class="fa fa-circle text-info"></i> %(dptclassAbb)s</a></li>' ,
+                        {
+                            instituteId: instId,
+                            schoolId: schId,
+                            departmentId: deptId,
+                            dptclassId: crse.id,
+                            dptclassAbb: crse.ce_abb,
+                        }
+                    ));
+                });
+            }).fail(function(err) {
+                window.alert('Cannot get Classes'); 
+            });
+        }
+
+        this.getStdByClass = function(instId, schId, deptId, dptclsId) {
+
+            const tbodyCss = '#unregstudents > tbody';
+            const self = this;
+            $(tbodyCss).empty();
+
+            url = sprintf('%s%s%s%s%s%s%s%s', '/api/binst/', instId, '/bsch/', schId, '/bdept/', deptId, '/bdptcls/', dptclsId);
+            console.log(url);
+
+            $.getJSON(url, function(response) {
+                console.log(response);
+                response.map(function(student) {
+                    $(tbodyCss).append(sprintf(
+                        '<tr> \
+                                <td><input type="checkbox" class="i-checks" name="input[]"></td> \
+                                <td>%(sid)s</td> \
+                                <td>%(name)s</td> \
+                                <td>%(cgpa)s</td> \
+                                <td>%(status)s</td> \
+                                <td>%(actions)s</td> \
+                            </tr>',
+                            {
+                                sid: student.student_id,
+                                name: self.getRSNameNode(student),
+                                cgpa: 4.5,
+                                status: '<i class="fa fa-check text-navy"></i>',
+                                actions: self.getUSActionsNode(student),
+                            }
+                        ));
+                });
+            }).fail(function(err) {
+                window.alert('Cannot get schools'); 
+            });
+        }
+
+        this.getUnregisteredStds = function() {
+
+            const tbodyCss = '#unregstudents > tbody';
+            const self = this;
+            $(tbodyCss).empty();
+            url = sprintf('%s', '/api/account/unregistered/');
+            // console.log(a);
+
+            $.getJSON(url, function(response) {
+                console.log(response);
+                response.results.map(function(student) {
+                    $(tbodyCss).append(sprintf(
+                            '<tr> \
+                                <td><input type="checkbox" class="i-checks" name="input[]"></td> \
+                                <td>%(sid)s</td> \
+                                <td>%(name)s</td> \
+                                <td>%(cgpa)s</td> \
+                                <td>%(status)s</td> \
+                                <td>%(actions)s</td> \
+                            </tr>',
+                            {
+                                sid: student.student_id,
+                                name: self.getUSNameNode(student),
+                                cgpa: 4.5,
+                                status: '<i class="fa fa-times text-danger"></i>',
+                                actions: self.getUSActionsNode(student),
+                            }
+                        ));
+                });
+            }).fail(function(err) {
+                window.alert('Cannot get schools'); 
+            });
+        }
+
+        this.getUSNameNode = function(student) {
+            return sprintf('%s %s', student.first_name, student.last_name);
+        }
+
+        this.getRSNameNode = function(student) {
+            return sprintf('<a href="/stdprofile/%s">%s %s</a>', student.pk, student.first_name, student.last_name);
+        }
+
+        this.getUSActionsNode = function(student) {
+            const node = sprintf('\
+                <div class="btn-group pull-right"> \
+                    <button data-studentId="%(studentId)s" class="btn-white btn btn-xs edit-student">Edit</button> \
+                    <button data-studentId="%(studentId)s" class="btn-white btn btn-xs delete-student">Delete</button> \
+                </div>',
+                {
+                    studentId: student.pk
+                }
+            );
+
+            return node;
+        }
+
+        this.getNameNode = function(school) {
+            return sprintf('<a href="%s/departments/">%s</a>', school.id, school.sch_abb);
+        }
+
+        this.getActionsNode = function(school) {
+            const node = sprintf('\
+                <div class="btn-group pull-right"> \
+                    <button data-schoolId="%(schoolId)s" class="btn-white btn btn-xs edit-school">Edit</button> \
+                    <button data-schoolId="%(schoolId)s" class="btn-white btn btn-xs delete-school">Delete</button> \
+                </div>',
+                {
+                    schoolId: school.id
+                }
+            );
+
+            return node;
+        }
+
+        this.pullStudents = function() {
+            window.setInterval((function() {
+                this.getUnregisteredStds();
+
+            }).bind(this), 1000 * 60);
+        }
+
+        this.studentFormIsValid = function() {
+
+            const form = document.getElementById('studentForm');
+            form.classList.remove('was-validated');
+
+            if (form.checkValidity() === true) {
+                const data = {};
+                data.school = $('#std-sch').val();
+                data.department = $('#std-dept').val();
+                data.dptclass = $('#std-dptcls').val();
+                data.student_id = $('input[name="std_id"]').val();
+                data.first_name = $('input[name="first_name"]').val();
+                data.last_name = $('input[name="last_name"]').val();
+                data.status = 'True';
+
+                return data;
+
+            } else {
+                form.classList.add('was-validated');
+            }
+        }
+
+        this.clearStudentForm = function() {
+            $('#std-sch').val(null);
+            $('#std-dept').val(null);
+            $('#std-dptcls').val(null);
+            $('input[name="std_id"]').val(null);
+            $('input[name="first_name"]').val(null);
+            $('input[name="last_name"]').val(null);
+        }
+
+        this.updateStudent = function(button, studentId) {
+            console.log('Update student');
+            const newStudentData = this.studentFormIsValid();
+            console.log(newStudentData);
+            dUrl = '/api/account/unregistered/';
+
+            if (newStudentData) {
+                console.log('Update student: ', studentId);
+                const url = sprintf('%s%s/', dUrl, studentId);
+
+                $.ajax({
+                    context: this,
+                    url: url,
+                    method: 'PATCH',
+                    data: newStudentData,
+                    success: function(resp) {
+                        $('#studentFormModal').modal('hide');
+                        this.clearStudentForm();
+                        this.getUnregisteredStds();
+                        $('#save-student-form').attr('data-studentid', null);
+                    },
+                    error: function(err) {
+                        if (err.hasOwnProperty('responseJSON')) {
+                            console.log(err.responseJSON);
+                            const errKey = Object.keys(err.responseJSON)[0];
+                            window.alert(sprintf('Cannot update student: %s', err.responseJSON[errKey][0]));
+                        } else {
+                            window.alert('Cannot create student.');
+                        }
+                    },
+                    complete: function() {
+                        button.reset();
+                    }
+                });
+
+            } else {
+                button.reset();
+            }
+        }
+
+        this.deleteStudent = function(studentId) {
+            console.log('Delete student: ', studentId);
+            dUrl = '/api/account/unregistered/';
+            const url = sprintf('%s%s', dUrl, studentId);
+
+            console.log(url);
+
+            $.ajax({
+                context: this,
+                url: url,
+                method: 'DELETE',
+                success: function(resp) {
+                    this.getUnregisteredStds();
+                },
+                error: function(resp) {
+                    window.alert('Cannot remove student');
+                }
+            });
+        }
+
+        this.setUpeditStudent = function(button, studentId) {
+            console.log('Edit student: ', studentId);
+            sUrl = '/api/account/unregistered/';
+            const url = sprintf('%s%s', sUrl, studentId);
+            console.log(url);
+
+            $('#save-student-form').attr('data-studentid', studentId);
+
+            $.getJSON(url, function(response) {
+                console.log(response);
+                button.reset();
+
+                $('#studentFormModalLabel').text('Update student');
+                $('#studentFormModal').modal('show');
+
+                $('input[name="std_id"]').val(response.student_id);
+                $('input[name="first_name"]').val(response.first_name);
+                $('input[name="last_name"]').val(response.last_name);
+
+                $('#std-sch').val(response.school);
+                $('#std-sch').change();
+
+                window.setTimeout(function() {
+                    $('#std-dept').val(response.department);
+                    $('#std-dept').change();
+
+                    window.setTimeout(function() {
+                        $('#std-dptcls').val(response.dptclass);
+                        $('#std-dptcls').change();
+                    }, 800);
+
+                }, 800);
+            });
+        }
+
+        function ButtonWrapper(buttonObj) {
+            this.originText = $(buttonObj).text();
+
+            this.loading = function() {
+                $(buttonObj).attr('disabled', true);
+                $(buttonObj).html('<span class="spinner-border spinner-border-sm"></span> Loading...');
+            }
+
+            this.reset = function() {
+                $(buttonObj).text(this.originText);
+                $(buttonObj).attr('disabled', false);
+            }
+        }
+
+
+    }
+ 
+
+    $(document).ready(function(event) {
+        const stdtab = new StudentTab();
+        
+        stdtab.getInstitutes();
+        stdtab.setUpListButtons();
+        stdtab.getUnregisteredStds();
+
+        // students.pullStudents();
+
+        $('.i-checks').iCheck({
+            checkboxClass: 'icheckbox_square-green',
+            radioClass: 'iradio_square-green',
+        });
+
+        $('#create-new-student').on('click', function(event) {
+            $('#save-student-form').attr('data-studentid', null);
+            stdtab.clearStudentForm();
+            $('#studentFormModalLabel').text('Create new student');
+            $('#studentFormModal').modal('show');
+        });
+
+        $('#save-student-form').on('click', function(event) {
+            const saveButton = new ButtonWrapper(event.target);
+            saveButton.loading();
+
+            const studentId = $(this).attr('data-studentid');
+
+            if (studentId) {
+                console.log('Updating');
+                stdtab.updateStudent(saveButton, studentId);
+            } else {
+                console.log('Creating');
+                stdtab.createStudent(saveButton);
+            }
+        });
+    });
+</script>
+
+{% endblock %}

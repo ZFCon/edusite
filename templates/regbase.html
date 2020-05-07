@@ -1,0 +1,28 @@
+{% load static %}
+<html><head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>HKUST Backend </title>
+
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'font-awesome/css/font-awesome.css' %}" rel="stylesheet">
+    <link href="{% static 'css/plugins/chosen/bootstrap-chosen.css' %}" rel="stylesheet">
+
+    <link href="{% static 'css/animate.css' %}" rel="stylesheet">
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+
+</head>
+
+<body class="gray-bg">
+    {% block content %}
+    
+    {% endblock %}
+    <script src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
+    <script src="{% static 'js/popper.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.js' %}"></script>
+    <script src="{% static 'js/plugins/chosen/chosen.jquery.js' %}"></script>
+    
+</body>
+</html>

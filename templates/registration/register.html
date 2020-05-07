@@ -1,0 +1,102 @@
+{% extends "regbase.html" %}
+
+{% block content %}
+
+<div class="loginColumns animated fadeInDown">
+    <div class="row">
+
+        <div class="col-md-4">
+            <h2 class="font-bold">ecroom - HKUST</h2>
+
+            <p>
+                Perfectly designed and precisely prepared admin theme with over 50 pages with extra new web app views.
+            </p>
+
+            <p>
+                Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.
+            </p>
+
+
+        </div>
+       
+        <div class="col-lg-8">
+          <div class="ibox ">
+              
+            <form class="m-t" role="form" method="post">{% csrf_token %}
+                
+                
+                <div class="ibox-content">
+                    <div class="row">
+                    
+                        <div class="col-sm-6 b-r">
+                            <div class="form-group">
+                              <select name="user_type" required class="select2_demo_1 form-control">
+                                  <option value="">---------</option>
+                                  <option value="S">Student</option>
+                                  <option value="T">Instructor</option>
+                              </select>
+                            </div>
+                            <div class="form-group">
+                              {% for field in registration_form %}
+                                {% for error in field.errors %}
+                                  <label id="email-error" class="error" for="email">{{ error }}</label>
+                                {% endfor %}
+                              {% endfor %}
+                              <input type="text" name="first_name" class="form-control" placeholder="First Name" required>
+                            </div>
+
+                            <div class="form-group">
+                              <input type="password" name="password" class="form-control" placeholder="Password" required>
+                            </div>
+                          </div>
+
+                          <div class="col-sm-6">
+                            <div class="form-group">
+                              <input type="email" name="email" class="form-control" placeholder="email" required>
+                              {% if login_form.non_field_errors %}
+                                <label id="password-error" class="error" for="password">{{registration_form.non_field_errors}}</label>  
+                              {% endif %}
+                            </div>
+                  
+                            <div class="form-group">
+                              <input type="text" name="last_name" class="form-control" placeholder="Last Name" required>
+                              <input type="hidden" name="username" value="HKUST" />
+                            </div>
+
+                            <div class="form-group">
+                              <input type="password" name="password2" class="form-control" placeholder="Repeat Password" required>
+                            </div>
+
+                          </div>
+                </div>
+                </div>
+                
+                <div class="ibox-footer">
+                  
+                    <button type="submit" class="btn btn-primary block full-width m-b">Create an Account</button>
+                 
+                </div>
+                <div class="ibox-footer">
+                  <span class="float-right"> <a href="#">Forgot password ?</a></span> 
+                  Already have an Account ?   <a href="/login/">  Login Here</a>
+                </div>
+
+            </form>  
+              
+          </div>
+      </div>
+        
+ 
+    </div>
+    <hr>
+    <div class="row">
+      <div class="col-md-6">
+        IUO Technologies Limited
+      </div>
+      <div class="col-md-6 text-right">
+        <small>© 2019-2020</small>
+      </div>
+    </div>
+</div>
+  
+{% endblock %}
