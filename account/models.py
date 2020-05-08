@@ -131,7 +131,7 @@ def create_auth_token(sender, instance=None, created=False, **kwargs):
 def create_account_profile(sender, instance, created, **kwargs):
     print('****', created)
     if instance.user_type == 'S':
-            Student.objects.get_or_create(user=instance, first_name=instance.first_name, last_name=instance.last_name, institute=instance.username)
+            Student.objects.get_or_create(user=instance, first_name=instance.first_name, last_name=instance.last_name)
     elif instance.user_type == 'T':
             Teacher.objects.get_or_create(user=instance)
     else:

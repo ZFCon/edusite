@@ -11,8 +11,8 @@ from account.forms import CreateStdForm
 def detail_std(request, id=None):
     form = CreateStdForm()
     std = Student.objects.filter(pk=id)
-    return render(request, "detail_std.html", {'form': form, 'std': std})
-
+    return render(request, "detail_std.html", locals())
+ 
 def list_std(request):
     form = CreateStdForm()
     stds = Student.objects.all()
