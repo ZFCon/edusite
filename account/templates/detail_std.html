@@ -80,12 +80,11 @@
                 <div class="">
                     <div>
                         <h2 class="no-margins">
-                            Alex Smith
+                            {{ std.first_name }} {{ std.last_name }}
                         </h2>
-                        <h4>Founder of Groupeq</h4>
+                        <h4>{{ std.institute }}</h4>
                         <small>
-                            There are many variations of passages of Lorem Ipsum available, but the majority
-                            have suffered alteration in some form Ipsum available.
+                            {{ std.school }}
                         </small>
                     </div>
                 </div>
@@ -127,8 +126,6 @@
             <h2 class="no-margins">206 480</h2>
             <div id="sparkline1"></div>
         </div>
-
-
     </div>
     <div class="row">
         <div class="col-lg-12">
@@ -154,83 +151,47 @@
                     </div>
                 </div>
                 <div class="ibox-content">
-                    <div class="row">
-                        <div class="col-sm-5 m-b-xs"><select class="form-control-sm form-control input-s-sm inline">
-                            <option value="0">Option 1</option>
-                            <option value="1">Option 2</option>
-                            <option value="2">Option 3</option>
-                            <option value="3">Option 4</option>
-                        </select>
-                        </div>
-                        <div class="col-sm-4 m-b-xs">
-                            <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                                <label class="btn btn-sm btn-white ">
-                                    <input type="radio" name="options" id="option1" autocomplete="off" checked> Day
-                                </label>
-                                <label class="btn btn-sm btn-white active">
-                                    <input type="radio" name="options" id="option2" autocomplete="off"> Week
-                                </label>
-                                <label class="btn btn-sm btn-white">
-                                    <input type="radio" name="options" id="option3" autocomplete="off"> Month
-                                </label>
+                    <form action="{% url 'detail_std' id %}" method="post">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-sm-5 m-b-xs">
+                                {{ form.dptclass }}
                             </div>
+                            <!-- <div class="col-sm-4 m-b-xs">
+                                <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                                    <label class="btn btn-sm btn-white ">
+                                        <input type="radio" name="options" id="option1" autocomplete="off" checked> Day
+                                    </label>
+                                    <label class="btn btn-sm btn-white active">
+                                        <input type="radio" name="options" id="option2" autocomplete="off"> Week
+                                    </label>
+                                    <label class="btn btn-sm btn-white">
+                                        <input type="radio" name="options" id="option3" autocomplete="off"> Month
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="input-group"><input placeholder="Search" type="text" class="form-control form-control-sm"> <span class="input-group-append"> <button type="button" class="btn btn-sm btn-primary">Go!
+                                </button> </span></div>
+
+                            </div> -->
                         </div>
-                        <div class="col-sm-3">
-                            <div class="input-group"><input placeholder="Search" type="text" class="form-control form-control-sm"> <span class="input-group-append"> <button type="button" class="btn btn-sm btn-primary">Go!
-                            </button> </span></div>
-
+                        <div class="table-responsive" id="courses">
+                                <input type="hidden" name="student_id" value="{{ id }}"/>
+                                <table class="table table-striped">
+                                    <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>Course name</th>
+                                        <th>ABB</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                                <button type="submit" class="btn btn-primary float-right">save</button>
                         </div>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                            <tr>
-
-                                <th></th>
-                                <th>Project </th>
-                                <th>Completed </th>
-                                <th>Task</th>
-                                <th>Date</th>
-                                <th>Action</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr>
-                                <td><input type="checkbox"  checked class="i-checks" name="input[]"></td>
-                                <td>Project<small>This is example of project</small></td>
-                                <td><span class="pie">0.52/1.561</span></td>
-                                <td>20%</td>
-                                <td>Jul 14, 2013</td>
-                                <td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
-                            </tr>
-                            <tr>
-                                <td><input type="checkbox" class="i-checks" name="input[]"></td>
-                                <td>Alpha project</td>
-                                <td><span class="pie">6,9</span></td>
-                                <td>40%</td>
-                                <td>Jul 16, 2013</td>
-                                <td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
-                            </tr>
-                            <tr>
-                                <td><input type="checkbox" class="i-checks" name="input[]"></td>
-                                <td>Betha project</td>
-                                <td><span class="pie">3,1</span></td>
-                                <td>75%</td>
-                                <td>Jul 18, 2013</td>
-                                <td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
-                            </tr>
-                            <tr>
-                                <td><input type="checkbox" class="i-checks" name="input[]"></td>
-                                <td>Gamma project</td>
-                                <td><span class="pie">4,9</span></td>
-                                <td>18%</td>
-                                <td>Jul 22, 2013</td>
-                                <td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
+                    </form>
                 </div>
             </div>
         </div>
@@ -244,12 +205,54 @@
 {% block page_js %}
 <script type="text/javascript" src="{% static 'js/ajax-tools.js' %}"></script>
 <script type="text/javascript">
+    var coursesProfile = [0];
+    {% for course in courses %}
+    coursesProfile.push(parseInt('{{ course.pk }}'));
+    {% endfor %}
+    
+    $(document).ready(() => {
+        ce_dptcls = $('#std-dptcls');
+        url = `/api/courses/?ce_dptcls=${ce_dptcls.val()}`;
+        getCourses(url);
+        ce_dptcls.change(function () {
+            url = `/api/courses/?ce_dptcls=${ce_dptcls.val()}`;
+            getCourses(url);
+        });
 
-//
-$('.i-checks').iCheck({
-    checkboxClass: 'icheckbox_square-green',
-    radioClass: 'iradio_square-green',
-});        
+    });
+
+    function getCourses(url) {
+        $.getJSON(url, (res) => {
+        pushCourses(res['results']);
+        });
+    }
+
+    function pushCourses(courses) {
+        coursesH = $('#courses table tbody')
+        coursesH.html('') // Clean it
+
+        courses.forEach((course) => {
+            let inStdCrses = ''
+            if (course.id in coursesProfile) {
+                inStdCrses = 'checked'
+            }
+
+            coursesH.append(`
+            <tr>
+                <td><input type="checkbox" class="i-checks" ${inStdCrses} name="course" value="${course.id}"></td>
+                <td>${course.ce_name}</td>
+                <td>${course.ce_abb}</td>
+            </tr>
+            `);
+        })
+    }
+</script>
+
+<script type="text/javascript">
+    $('.i-checks').iCheck({
+        checkboxClass: 'icheckbox_square-green',
+        radioClass: 'iradio_square-green',
+    });        
 </script>
 
 {% endblock %}

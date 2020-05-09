@@ -1,5 +1,24 @@
 from django import forms
 from account.models import Student
+from .models import Student as StudentCourses
+
+class UpdateStdCrseForm(forms.ModelForm):
+    class Meta:
+        model = StudentCourses
+        fields = ['student_id', 'course']
+        widgets ={ 
+            'student_id': forms.TextInput(attrs={
+            'class':'form-control',
+            'id': 'std-id',
+            'required': True,
+            'placeholder':'Abbreviation'
+            }),
+            'course': forms.SelectMultiple(attrs={
+            'class':'form-control',
+            'id': 'course',
+            'required': True,
+            }),
+            }
 
 class CreateStdForm(forms.ModelForm): 
 	class Meta:

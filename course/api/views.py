@@ -20,6 +20,7 @@ class CsrfExemptSessionAuthentication(SessionAuthentication):
 class CourseViewSet(viewsets.ModelViewSet):  
     serializer_class = CourseSerializer
     queryset = Course.objects.all()
+    filterset_fields = ['ce_dptcls']
 
 
 class SCourseViewSet(viewsets.ViewSet):

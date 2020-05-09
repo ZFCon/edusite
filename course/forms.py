@@ -2,7 +2,6 @@ from django import forms
 
 from course.models import Course
 
-
 class CreateCrseForm(forms.ModelForm):
 
 	class Meta:

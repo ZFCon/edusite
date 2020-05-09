@@ -1,12 +1,11 @@
 from django.db import models
-from account.models import Student
 from school.models import School 
 from department.models import Department
 from dptclass.models import DptClass
 
 class Student(models.Model):
-    student_id = models.ForeignKey(Student, on_delete=models.CASCADE)
-    course    = models.ManyToManyField('course.Course', related_name="sc_crse_reg")  
+    student_id = models.OneToOneField('account.Student', on_delete=models.CASCADE)
+    course    = models.ManyToManyField('course.Course', null=True, blank=True, related_name="sc_crse_reg")  
 
     def get_absolute_url(self):
         return reverse('student-detail-view', args=[str(self.student_id)])

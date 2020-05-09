@@ -7,12 +7,29 @@ from school.models import School
 from department.models import Department
 from dptclass.models import DptClass
 from account.forms import CreateStdForm
+from student.forms import UpdateStdCrseForm
+from student.models import Student as StudentCourse
+
 
 def detail_std(request, id=None):
-    form = CreateStdForm()
-    std = Student.objects.filter(pk=id)
+    std = Student.objects.filter(pk=id).first()
+    stdcrs, _ = StudentCourse.objects.get_or_create(student_id=std)
+
+    form = CreateStdForm(instance=std)
+    crse_form = UpdateStdCrseForm(instance=std.student)
+
+    courses = stdcrs.course.all()
+    if request.method == 'POST':
+        dptclass = DptClass.objects.get(pk=request.POST['dptclass'])
+        std.dptclass = dptclass
+        std.save()
+
+        form = CreateStdForm(instance=std)
+        crse_form = UpdateStdCrseForm(request.POST, instance=std.student)
+        crse_form.save()
+
     return render(request, "detail_std.html", locals())
- 
+
 def list_std(request):
     form = CreateStdForm()
     stds = Student.objects.all()
